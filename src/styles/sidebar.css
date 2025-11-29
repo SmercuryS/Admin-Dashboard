@@ -1,0 +1,60 @@
+.sidebar {
+  width: 260px;
+  background: #cee7fc;
+  padding: 20px;
+  border: 2px solid #c9c9c9;
+  border-radius: 10px;
+}
+
+.droppers {
+  width: 80%;
+  margin-bottom: 15px;
+  padding: 8px;
+  background: #ecebeb;
+  border-radius: 5px;
+}
+
+.apply-btn {
+  background: #acc9ff;
+  border-color: black;
+  cursor: pointer;
+  width: 80%;
+  margin-bottom: 5px;
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.apply-btn:hover {
+  background: #89a8e2;
+}
+
+.dynamic-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.trash-btn {
+  background: #fc8585;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.add-btn {
+  width: 80%;
+  margin-bottom: 15px;
+  padding: 8px;
+  background: #bbf5bd;
+  color: rgb(0, 0, 0);
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.add-btn:hover {
+  background: #94df97;
+}

@@ -1,0 +1,26 @@
+.header {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: #e2fff6;
+  border-bottom: 1px solid #d3b7b7;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  margin-right: 30px;
+}
+
+.tabs button {
+  margin-right: 10px;
+  padding: 14px 28px;
+  background: #ffeacf;
+  cursor: pointer;
+  margin-left: 280px;
+  border-radius: 5px;
+}
+
+.tabs button:hover {
+  background: #ecd0ab;
+}
