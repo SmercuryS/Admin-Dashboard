@@ -10,7 +10,7 @@ let nextId = 1000000;
 
 // Helper function to check if label is unique
 const isLabelUnique = (label, polygonsRef, excludeId = null) => {
-  if (!label || !label.trim()) return true; // Empty label is not considered
+  if (!label || !label.trim()) return true;
   return !polygonsRef.current.some(
     (polygon) =>
       polygon.label &&
@@ -21,7 +21,7 @@ const isLabelUnique = (label, polygonsRef, excludeId = null) => {
 
 // Helper function to check if code/ID is unique
 const isCodeUnique = (code, polygonsRef, excludeId = null) => {
-  if (!code || !code.trim()) return true; // Empty code is not considered
+  if (!code || !code.trim()) return true;
   return !polygonsRef.current.some(
     (polygon) =>
       polygon.code &&
@@ -40,29 +40,25 @@ const generateUniqueId = (polygonsRef) => {
 };
 
 function attachPolygonMenu(layer, polygonsRef, updateSavedPolygons) {
-  // Ensure layer has an ID
   if (!layer._leaflet_id) {
     layer._leaflet_id = Math.floor(Math.random() * 9999999);
   }
 
-  // Get the polygon ID from the layer or generate one
   const polygonId = layer.polygonId || layer._leaflet_id;
-
-  // Find the polygon in the ref
   const polygon = polygonsRef.current.find((p) => p.id === polygonId);
   const code = polygon?.code || "";
   const label = polygon?.label || "";
 
   const popupContent = `
-    <div style="display:flex; flex-direction:column; gap:6px;">
-      <div style="margin-bottom: 8px;">
+    <div class="polygon-popup">
+      <div class="popup-header">
         <strong>Code:</strong> ${code}<br>
         <strong>Label:</strong> ${label}<br>
         <small>ID: ${polygonId}</small>
       </div>
-      <button id="edit-btn-${polygonId}" style="padding:6px;">Edit Shape</button>
-      <button id="properties-btn-${polygonId}" style="padding:6px; background:#ff9800;">Edit Properties</button>
-      <button id="delete-btn-${polygonId}" style="padding:6px; background:#e53935; color:white;">Delete</button>
+      <button id="edit-btn-${polygonId}" class="popup-btn edit-btn">Edit Shape</button>
+      <button id="properties-btn-${polygonId}" class="popup-btn properties-btn">Edit Properties</button>
+      <button id="delete-btn-${polygonId}" class="popup-btn delete-btn">Delete</button>
     </div>
   `;
 
@@ -77,8 +73,6 @@ function attachPolygonMenu(layer, polygonsRef, updateSavedPolygons) {
       if (editBtn) {
         editBtn.onclick = () => {
           layer.editing.enable();
-
-          // When editing completes, save the new geometry
           layer.on("editable:editing", () => {
             const index = polygonsRef.current.findIndex(
               (p) => p.id === polygonId
@@ -102,7 +96,6 @@ function attachPolygonMenu(layer, polygonsRef, updateSavedPolygons) {
           const currentCode = polygon?.code || "";
           const currentLabel = polygon?.label || "";
 
-          // Function to validate and get new values
           const getNewValues = () => {
             let newCode, newLabel;
             let valid = false;
@@ -112,15 +105,14 @@ function attachPolygonMenu(layer, polygonsRef, updateSavedPolygons) {
                 "Enter new code ID (must be unique):",
                 currentCode
               );
-              if (newCode === null) return null; // User cancelled
+              if (newCode === null) return null;
 
               newLabel = prompt(
                 "Enter new label (must be unique):",
                 currentLabel
               );
-              if (newLabel === null) return null; // User cancelled
+              if (newLabel === null) return null;
 
-              // Check uniqueness
               const isCodeValid = isCodeUnique(newCode, polygonsRef, polygonId);
               const isLabelValid = isLabelUnique(
                 newLabel,
@@ -158,17 +150,16 @@ function attachPolygonMenu(layer, polygonsRef, updateSavedPolygons) {
               polygonsRef.current[index].code = newCode;
               polygonsRef.current[index].label = newLabel;
 
-              // Update popup content
               const updatedPopup = `
-                <div style="display:flex; flex-direction:column; gap:6px;">
-                  <div style="margin-bottom: 8px;">
+                <div class="polygon-popup">
+                  <div class="popup-header">
                     <strong>Code:</strong> ${newCode}<br>
                     <strong>Label:</strong> ${newLabel}<br>
                     <small>ID: ${polygonId}</small>
                   </div>
-                  <button id="edit-btn-${polygonId}" style="padding:6px;">Edit Shape</button>
-                  <button id="properties-btn-${polygonId}" style="padding:6px; background:#ff9800;">Edit Properties</button>
-                  <button id="delete-btn-${polygonId}" style="padding:6px; background:#e53935; color:white;">Delete</button>
+                  <button id="edit-btn-${polygonId}" class="popup-btn edit-btn">Edit Shape</button>
+                  <button id="properties-btn-${polygonId}" class="popup-btn properties-btn">Edit Properties</button>
+                  <button id="delete-btn-${polygonId}" class="popup-btn delete-btn">Delete</button>
                 </div>
               `;
               layer.bindPopup(updatedPopup);
@@ -248,19 +239,17 @@ function DrawTools({ polygonsRef, updateSavedPolygons }) {
     map.on("draw:created", (e) => {
       const layer = e.layer;
 
-      // Function to get valid unique values from user
       const getUniqueValues = () => {
         let codeId, label;
         let valid = false;
 
         while (!valid) {
           codeId = prompt("Enter code ID (must be unique):");
-          if (codeId === null) return null; // User cancelled
+          if (codeId === null) return null;
 
           label = prompt("Enter label (must be unique):");
-          if (label === null) return null; // User cancelled
+          if (label === null) return null;
 
-          // Check uniqueness
           const isCodeValid = isCodeUnique(codeId, polygonsRef);
           const isLabelValid = isLabelUnique(label, polygonsRef);
 
@@ -283,11 +272,9 @@ function DrawTools({ polygonsRef, updateSavedPolygons }) {
       };
 
       const values = getUniqueValues();
-      if (!values) return; // User cancelled
+      if (!values) return;
 
       const { codeId, label } = values;
-
-      // Generate a unique ID
       const newId = generateUniqueId(polygonsRef);
       layer.polygonId = newId;
 
@@ -331,15 +318,13 @@ function DrawTools({ polygonsRef, updateSavedPolygons }) {
   return null;
 }
 
-/* ========================================================= */
-/* ===================== MAIN COMPONENT ===================== */
-/* ========================================================= */
+/* ============= MAIN COMPONENT ===================== */
 export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
   const [layers, setLayers] = useState([]);
   const [activeLayer, setActiveLayer] = useState(0);
   const [savedPolygons, setSavedPolygons] = useState(null);
   const polygonsRef = useRef([]);
-  const [forceUpdate, setForceUpdate] = useState(0); // For forcing re-renders
+  const [forceUpdate, setForceUpdate] = useState(0);
   const [highlightedLayer, setHighlightedLayer] = useState(null);
   const mapRef = useRef(null);
 
@@ -362,7 +347,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
 
     setSavedPolygons(updatedPolygons);
 
-    // Pass data to App.jsx:
     if (onPolygonsUpdate) {
       onPolygonsUpdate(updatedPolygons);
     }
@@ -373,7 +357,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
   // Handle polygon highlighting when selectedPolygon changes
   useEffect(() => {
     if (!selectedPolygon || !selectedPolygon.geometry) {
-      // Remove highlight if no polygon is selected
       if (highlightedLayer) {
         highlightedLayer.remove();
         setHighlightedLayer(null);
@@ -383,21 +366,18 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
 
     console.log("Highlighting polygon:", selectedPolygon.id);
 
-    // Get the map instance
     const map = mapRef.current;
     if (!map) {
       console.warn("Map instance not available");
       return;
     }
 
-    // Remove previous highlight
     if (highlightedLayer) {
       highlightedLayer.remove();
     }
 
-    // Create highlight style
     const highlightStyle = {
-      color: "#FF0000", // Red border
+      color: "#FF0000",
       weight: 4,
       fillColor: "#FF0000",
       fillOpacity: 0.3,
@@ -405,21 +385,17 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
       dashArray: null,
     };
 
-    // Create highlight layer
     const layer = L.geoJSON(selectedPolygon.geometry, {
       style: highlightStyle,
     }).addTo(map);
 
-    // Zoom to the highlighted polygon
     const bounds = layer.getBounds();
     if (bounds.isValid()) {
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
     }
 
-    // Store the layer for later removal
     setHighlightedLayer(layer);
 
-    // Cleanup function
     return () => {
       if (layer) {
         layer.remove();
@@ -432,7 +408,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
     try {
       console.log("🔄 Attempting to save polygons...");
 
-      // Validate uniqueness before saving
       const codeMap = new Map();
       const labelMap = new Map();
       const duplicates = [];
@@ -474,7 +449,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
 
       console.log("✅ All polygons have unique codes and labels");
 
-      // Test server connection
       try {
         const testResponse = await fetch("http://localhost:3001/api/test");
         if (!testResponse.ok) {
@@ -489,7 +463,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
         return;
       }
 
-      // Prepare data for saving
       const dataToSave = polygonsRef.current.map((polygon) => ({
         id: polygon.id,
         geometry: polygon.geometry,
@@ -522,7 +495,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
 
       alert(`✅ ${result.message}\nSaved ${result.count} polygons`);
 
-      // Force reload data from server
       setTimeout(() => {
         window.location.reload();
       }, 500);
@@ -558,7 +530,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
       try {
         console.log("📥 Loading polygons from server...");
 
-        // Try to load from API endpoint first
         const timestamp = Date.now();
         const apiRes = await fetch(
           `http://localhost:3001/api/get-polygons?t=${timestamp}`
@@ -568,7 +539,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
           const apiData = await apiRes.json();
           console.log("📥 Loaded from API:", apiData.count, "polygons");
 
-          // Check for duplicates in loaded data
           const codeSet = new Set();
           const labelSet = new Set();
           const duplicates = [];
@@ -625,7 +595,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
         console.log("API endpoint not available, trying direct file...");
       }
 
-      // Fallback to direct file
       try {
         const timestamp = Date.now();
         const res = await fetch(`/polygons.json?t=${timestamp}`);
@@ -647,7 +616,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
         const data = await res.json();
         console.log("📥 Loaded polygons.json:", data.length, "polygons");
 
-        // Check for duplicates
         const codeSet = new Set();
         const labelSet = new Set();
         const duplicates = [];
@@ -727,7 +695,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
 
   /* ---------- DOWNLOAD polygons.json ---------- */
   const downloadPolygons = () => {
-    // Validate before downloading
     const codeMap = new Map();
     const labelMap = new Map();
     const duplicates = [];
@@ -824,89 +791,69 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
   };
 
   /* ---------- MAP LAYER STYLES ---------- */
-  const styles = [
+  const layerStyles = [
     { color: "#000", weight: 5, fillOpacity: 0 },
     { color: "#0b5", weight: 5, fillOpacity: 0 },
     { color: "#06f", weight: 2, fillOpacity: 0 },
   ];
 
+  const polygonStyle = {
+    color: "#FF4081",
+    weight: 3,
+    fillColor: "#FF4081",
+    fillOpacity: 0.3,
+  };
+
   const labels = ["ایران", "استان‌ها", "شهرستان‌ها"];
 
   return (
-    <div className="map-card" style={{ flex: 1 }}>
-      <div
-        style={{
-          marginBottom: 10,
-          display: "flex",
-          gap: "10px",
-          flexWrap: "wrap",
-        }}
-      >
+    <div className="map-card">
+      <div className="map-controls">
         {labels.map((t, idx) => (
           <button
             key={t}
             onClick={() => setActiveLayer(idx)}
-            className={activeLayer === idx ? "active-btn" : ""}
+            className={`layer-btn ${activeLayer === idx ? "active-btn" : ""}`}
           >
             {t}
           </button>
         ))}
 
-        <button
-          onClick={downloadPolygons}
-          style={{ padding: "6px 12px", background: "#2196f3", color: "white" }}
-        >
+        <button onClick={downloadPolygons} className="map-btn download-btn">
           Download Polygons (JSON)
         </button>
 
-        <button
-          onClick={savePolygonsToServer}
-          style={{ padding: "6px 12px", background: "#4CAF50", color: "white" }}
-        >
+        <button onClick={savePolygonsToServer} className="map-btn save-btn">
           Save to Server
         </button>
 
-        <button
-          onClick={refreshData}
-          style={{ padding: "6px 12px", background: "#9C27B0", color: "white" }}
-        >
+        <button onClick={refreshData} className="map-btn refresh-btn">
           Refresh Data
         </button>
       </div>
 
-      {/* Debug info */}
-      <div
-        style={{
-          marginBottom: "10px",
-          padding: "5px",
-          background: "#f5f5f5",
-          fontSize: "12px",
-          borderRadius: "3px",
-        }}
-      >
+      {/* <div className="debug-info">
         <span>Polygons in memory: {polygonsRef.current.length}</span>
-        <span style={{ marginLeft: "10px" }}>|</span>
-        <span style={{ marginLeft: "10px" }}>
-          Polygons displayed: {savedPolygons?.features?.length || 0}
-        </span>
+        <span className="debug-separator">|</span>
+        <span>Polygons displayed: {savedPolygons?.features?.length || 0}</span>
         {selectedPolygon && (
-          <span
-            style={{ marginLeft: "10px", color: "#FF0000", fontWeight: "bold" }}
-          >
-            | Selected:{" "}
-            {selectedPolygon.properties?.label || selectedPolygon.id}
-          </span>
+          <>
+            <span className="debug-separator">|</span>
+            <span className="selected-polygon">
+              Selected:{" "}
+              {selectedPolygon.properties?.label || selectedPolygon.id}
+            </span>
+          </>
         )}
-      </div>
+      </div> */}
 
-      {/* MAP */}
-      <div className="map-style" style={{ height: 600 }}>
+      <div className="map-container">
         <MapContainer
           ref={mapRef}
           key={mapKey}
           center={[32, 53]}
           zoom={5}
-          style={{ height: "80%", width: "160%" }}
+          className="leaflet-map"
           whenCreated={(mapInstance) => {
             mapRef.current = mapInstance;
           }}
@@ -918,7 +865,10 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
 
           {layers[activeLayer] && (
             <>
-              <GeoJSON data={layers[activeLayer]} style={styles[activeLayer]} />
+              <GeoJSON
+                data={layers[activeLayer]}
+                style={layerStyles[activeLayer]}
+              />
               <FitBoundsWhenReady geojson={layers[activeLayer]} />
             </>
           )}
@@ -928,19 +878,13 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
               key={`polygons-${savedPolygons.features.length}-${forceUpdate}`}
               data={savedPolygons}
               onEachFeature={(feature, layer) => {
-                // Set polygon ID from feature
                 const polygonId = feature.id || feature.properties.id;
                 layer.polygonId = polygonId;
-                layer._leaflet_id = polygonId; // Also set leaflet ID for consistency
+                layer._leaflet_id = polygonId;
 
                 attachPolygonMenu(layer, polygonsRef, updateSavedPolygons);
               }}
-              style={{
-                color: "#FF4081",
-                weight: 3,
-                fillColor: "#FF4081",
-                fillOpacity: 0.3,
-              }}
+              style={polygonStyle}
             />
           )}
 

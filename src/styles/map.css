@@ -1,35 +1,54 @@
 .map-card {
   width: 400px;
-  height: 450px;
-  background: white;
-  /* margin: 20px auto; */
+  height: 670px;
+  background: rgb(219, 255, 209);
   padding: 10px;
-  display: block; /* make sure auto-centering works */
+  display: block;
   box-sizing: border-box;
-  margin-left: 200px;
+  margin-left: 5px;
   margin-right: 200px;
+  margin-top: 20px;
   border-color: black;
-  border: black;
+  border: 1px solid black;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex: 1;
 }
 
-.map-style {
-  width: 60%;
+.map-container {
+  height: 600px;
+  width: 100%;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.leaflet-map {
   height: 100%;
-  border-color: black;
+  width: 100%;
 }
 
-.layer-buttons button {
+.map-controls {
+  margin-bottom: 15px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.layer-btn {
   padding: 8px 16px;
   background: #eee;
   border: 1px solid #bbb;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
+  transition: all 0.2s;
 }
 
-.layer-buttons button:hover {
+.layer-btn:hover {
   background: #ddd;
-  cursor: pointer;
+  transform: translateY(-1px);
 }
 
 .active-btn {
@@ -37,11 +56,150 @@
   border-color: #004ad1;
   font-weight: 700;
   cursor: pointer;
-  width: 150px;
-  height: 50px;
+  background: #e3f2fd;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
 }
 
-.layer-buttons button,
-button {
+.map-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  color: white;
+  min-width: 160px;
+}
+
+.map-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.download-btn {
+  background: #2196f3;
+}
+
+.save-btn {
+  background: #4caf50;
+}
+
+.refresh-btn {
+  background: #9c27b0;
+}
+
+.debug-info {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #f5f5f5;
+  font-size: 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #666;
+}
+
+.debug-separator {
+  color: #999;
+}
+
+.selected-polygon {
+  color: #ff0000;
+  font-weight: bold;
+  background: #ffebee;
+  padding: 2px 8px;
+  border-radius: 3px;
+  border-left: 3px solid #ff0000;
+}
+
+.polygon-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.popup-header {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.popup-header strong {
+  color: #333;
+}
+
+.popup-header small {
+  color: #666;
+  font-size: 11px;
+}
+
+.popup-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.popup-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.edit-btn {
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.properties-btn {
+  background: #ff9800;
+  color: white;
+}
+
+.delete-btn {
+  background: #e53935;
+  color: white;
+}
+
+.leaflet-draw-toolbar {
+  margin-top: 10px;
+}
+
+.leaflet-draw-toolbar a {
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+.leaflet-draw-toolbar a:hover {
+  background-color: #f4f4f4;
+}
+
+@media (max-width: 1200px) {
+  .map-card {
+    margin-left: 100px;
+    margin-right: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .map-card {
+    margin-left: 20px;
+    margin-right: 20px;
+    width: auto;
+  }
+
+  .map-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .map-btn {
+    width: 100%;
+  }
 }

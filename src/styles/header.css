@@ -4,6 +4,9 @@
   padding: 15px;
   background: #e2fff6;
   border-bottom: 1px solid #d3b7b7;
+  border-right: #d3b7b7;
+  border-top: #d3b7b7;
+  border-left: #d3b7b7;
 }
 
 .logo {

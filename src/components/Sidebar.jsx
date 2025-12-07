@@ -6,6 +6,7 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedResult, setSelectedResult] = useState(null);
+  const [showAllPolygons, setShowAllPolygons] = useState(false);
 
   const options = ["___", "سیب", "گردو", "نخل", "مرکبات"];
   const provinceOptions = [
@@ -60,6 +61,18 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
     console.log("Selected polygon from sidebar:", polygon);
   };
 
+  // Handle polygon selection from all polygons list
+  const handleAllPolygonClick = (polygon) => {
+    setSelectedResult(polygon);
+
+    // Notify parent component (App.jsx) about the selection
+    if (onPolygonSelect) {
+      onPolygonSelect(polygon);
+    }
+
+    console.log("Selected polygon from all list:", polygon);
+  };
+
   // Clear search
   const clearSearch = () => {
     setSearchQuery("");
@@ -72,18 +85,24 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
     }
   };
 
+  // Toggle showing all polygons
+  const toggleAllPolygons = () => {
+    setShowAllPolygons(!showAllPolygons);
+  };
+
   return (
     <div className="sidebar">
       {/* SEARCH SECTION */}
       <div className="search-section">
-        <h3>جستجوی پلیگون</h3>
+        <h3>جستجوی پولیگان</h3>
         <div className="search-input-group">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="جستجوی برچسب پلیگون..."
+            placeholder="جستجوی برچسب پولیگان ..."
             className="search-input"
+            dir="auto"
             onKeyPress={(e) => e.key === "Enter" && handleSearch()}
           />
           <div className="search-buttons">
@@ -93,9 +112,6 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
               disabled={!searchQuery.trim()}
             >
               جستجو
-            </button>
-            <button onClick={clearSearch} className="clear-btn">
-              پاک کردن
             </button>
           </div>
         </div>
@@ -133,12 +149,61 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
 
         {/* Display message if no polygons yet */}
         {!polygons && (
-          <div className="no-data-message">منتظر بارگذاری پلیگون‌ها...</div>
+          <div className="no-data-message">منتظر بارگذاری پولیگان ها ...</div>
         )}
 
         {polygons && polygons.features.length === 0 && (
           <div className="no-data-message">
-            هنوز پلیگونی وجود ندارد. اولین پلیگون را روی نقشه ایجاد کنید.
+            هنوز پولیگانی وجود ندارد. اولین پولیگان را روی نقشه ایجاد کنید.
+          </div>
+        )}
+      </div>
+
+      <hr className="divider" />
+
+      {/* ALL POLYGONS LIST SECTION */}
+      <div className="all-polygons-section">
+        <div className="section-header">
+          <h3>لیست پولیگان‌ها</h3>
+          <button
+            className="toggle-btn"
+            onClick={toggleAllPolygons}
+            title={showAllPolygons ? "بستن لیست" : "نمایش لیست"}
+          >
+            {showAllPolygons ? "▲" : "▼"}
+          </button>
+        </div>
+
+        {showAllPolygons && polygons && polygons.features.length > 0 && (
+          <div className="all-polygons-list">
+            <div className="results-header">
+              <span>کل پولیگان‌ها: {polygons.features.length}</span>
+            </div>
+            <div className="results-list">
+              {polygons.features.map((polygon) => (
+                <div
+                  key={polygon.id || polygon.properties?.id}
+                  className={`result-item ${
+                    selectedResult?.id === polygon.id ? "selected" : ""
+                  }`}
+                  onClick={() => handleAllPolygonClick(polygon)}
+                  title={`کد: ${polygon.properties?.code || "بدون کد"}`}
+                >
+                  <span className="result-label">
+                    {polygon.properties?.label || "بدون نام"}
+                  </span>
+                  <span className="result-code">
+                    ({polygon.properties?.code || "N/A"})
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {showAllPolygons && polygons && polygons.features.length === 0 && (
+          <div className="no-data-message">
+            هنوز پولیگانی وجود ندارد. اولین پولیگان را روی نقشه ایجاد کنید.
           </div>
         )}
       </div>
