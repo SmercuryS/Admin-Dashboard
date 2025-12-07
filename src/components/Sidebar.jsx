@@ -1,143 +1,11 @@
-// import React from "react";
-// import "../styles/sidebar.css";
-
-// export default function Sidebar() {
-//   return (
-//     <div className="sidebar">
-//       <h3>Lables</h3>
-
-//       <select className="droppers">
-//         <option>___</option>
-//         <option>سیب</option>
-//         <option>گردو</option>
-//         <option>نخل</option>
-//         <option>مرکبات</option>
-//       </select>
-
-//       <select className="droppers">
-//         <option>___</option>
-//         <option>سیب</option>
-//         <option>گردو</option>
-//         <option>نخل</option>
-//         <option>مرکبات</option>
-//       </select>
-
-//       <select className="droppers">
-//         <option>___</option>
-//         <option>سیب</option>
-//         <option>گردو</option>
-//         <option>نخل</option>
-//         <option>مرکبات</option>
-//       </select>
-
-//       <select className="droppers">
-//         <option>___</option>
-//         <option>سیب</option>
-//         <option>گردو</option>
-//         <option>نخل</option>
-//         <option>مرکبات</option>
-//       </select>
-
-//       <button className="apply-btn">Apply</button>
-
-//       <h3>استان ها</h3>
-
-//       <select className="droppers">
-//         <option>___</option>
-//         <option>فارس</option>
-//         <option>کهکیلویه و بویراحمد</option>
-//         <option>یزد</option>
-//         <option>کرمان</option>
-//       </select>
-//     </div>
-//   );
-// }
-
-// import React, { useState } from "react";
-// import "../styles/sidebar.css";
-
-// export default function Sidebar() {
-//   const [extraSelects, setExtraSelects] = useState([]);
-
-//   const options = ["___", "سیب", "گردو", "نخل", "مرکبات"];
-
-//   function addSelect() {
-//     setExtraSelects([...extraSelects, { id: Date.now() }]);
-//   }
-
-//   function removeSelect(id) {
-//     setExtraSelects(extraSelects.filter((item) => item.id !== id));
-//   }
-
-//   return (
-//     <div className="sidebar">
-//       <h3>Lables</h3>
-
-//       {/* Your fixed original dropdowns */}
-//       <select className="droppers">
-//         {options.map((o) => (
-//           <option key={o}>{o}</option>
-//         ))}
-//       </select>
-
-//       <select className="droppers">
-//         {options.map((o) => (
-//           <option key={o}>{o}</option>
-//         ))}
-//       </select>
-
-//       <select className="droppers">
-//         {options.map((o) => (
-//           <option key={o}>{o}</option>
-//         ))}
-//       </select>
-
-//       <select className="droppers">
-//         {options.map((o) => (
-//           <option key={o}>{o}</option>
-//         ))}
-//       </select>
-
-//       {/* Dynamically added dropdowns */}
-//       {extraSelects.map((item) => (
-//         <div key={item.id} className="dynamic-row">
-//           <select>
-//             {options.map((o) => (
-//               <option key={o}>{o}</option>
-//             ))}
-//           </select>
-
-//           <button className="trash-btn" onClick={() => removeSelect(item.id)}>
-//             🗑️
-//           </button>
-//         </div>
-//       ))}
-
-//       {/* + button */}
-//       <button className="add-btn" onClick={addSelect}>
-//         +
-//       </button>
-
-//       <button className="apply-btn">Apply</button>
-
-//       <h3>استان ها</h3>
-
-//       <select className="droppers">
-//         <option>___</option>
-//         <option>فارس</option>
-//         <option>کهکیلویه و بویراحمد</option>
-//         <option>یزد</option>
-//         <option>کرمان</option>
-//       </select>
-//     </div>
-//   );
-// }
-
 import React, { useState } from "react";
 import "../styles/sidebar.css";
 
-export default function Sidebar() {
+export default function Sidebar({ polygons, onPolygonSelect }) {
   const [provinceSelects, setProvinceSelects] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedResult, setSelectedResult] = useState(null);
 
   const options = ["___", "سیب", "گردو", "نخل", "مرکبات"];
   const provinceOptions = [
@@ -156,9 +24,129 @@ export default function Sidebar() {
     setProvinceSelects(provinceSelects.filter((item) => item.id !== id));
   }
 
+  // Search function
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setSelectedResult(null);
+      return;
+    }
+
+    if (!polygons || !polygons.features) {
+      console.log("No polygons available for search");
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const results = polygons.features.filter((feature) => {
+      const label = feature.properties?.label || "";
+      return label.toLowerCase().includes(query);
+    });
+
+    setSearchResults(results);
+    setSelectedResult(null); // Clear previous selection when new search
+    console.log(`Found ${results.length} polygons matching "${searchQuery}"`);
+  };
+
+  // Handle polygon selection from search results
+  const handleResultClick = (polygon) => {
+    setSelectedResult(polygon);
+
+    // Notify parent component (App.jsx) about the selection
+    if (onPolygonSelect) {
+      onPolygonSelect(polygon);
+    }
+
+    console.log("Selected polygon from sidebar:", polygon);
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchQuery("");
+    setSearchResults([]);
+    setSelectedResult(null);
+
+    // Clear selection in parent component
+    if (onPolygonSelect) {
+      onPolygonSelect(null);
+    }
+  };
+
   return (
     <div className="sidebar">
-      <h3>Lables</h3>
+      {/* SEARCH SECTION */}
+      <div className="search-section">
+        <h3>جستجوی پلیگون</h3>
+        <div className="search-input-group">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="جستجوی برچسب پلیگون..."
+            className="search-input"
+            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+          />
+          <div className="search-buttons">
+            <button
+              onClick={handleSearch}
+              className="search-btn"
+              disabled={!searchQuery.trim()}
+            >
+              جستجو
+            </button>
+            <button onClick={clearSearch} className="clear-btn">
+              پاک کردن
+            </button>
+          </div>
+        </div>
+
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <div className="search-results">
+            <div className="results-header">
+              <span>{searchResults.length} نتیجه یافت شد:</span>
+              <button onClick={clearSearch} className="small-clear-btn">
+                ×
+              </button>
+            </div>
+            <div className="results-list">
+              {searchResults.map((polygon) => (
+                <div
+                  key={polygon.id || polygon.properties?.id}
+                  className={`result-item ${
+                    selectedResult?.id === polygon.id ? "selected" : ""
+                  }`}
+                  onClick={() => handleResultClick(polygon)}
+                  title={`کد: ${polygon.properties?.code || "بدون کد"}`}
+                >
+                  <span className="result-label">
+                    {polygon.properties?.label || "بدون نام"}
+                  </span>
+                  <span className="result-code">
+                    ({polygon.properties?.code || "N/A"})
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Display message if no polygons yet */}
+        {!polygons && (
+          <div className="no-data-message">منتظر بارگذاری پلیگون‌ها...</div>
+        )}
+
+        {polygons && polygons.features.length === 0 && (
+          <div className="no-data-message">
+            هنوز پلیگونی وجود ندارد. اولین پلیگون را روی نقشه ایجاد کنید.
+          </div>
+        )}
+      </div>
+
+      <hr className="divider" />
+
+      {/* Existing dropdowns section */}
+      <h3>برچسب ها</h3>
 
       {/* FIXED TOP DROPDOWNS */}
       <select className="droppers">
@@ -207,7 +195,7 @@ export default function Sidebar() {
             className="trash-btn"
             onClick={() => removeProvinceSelect(item.id)}
           >
-            🗑️
+            ❌
           </button>
         </div>
       ))}
@@ -217,7 +205,7 @@ export default function Sidebar() {
         +
       </button>
 
-      <button className="apply-btn">Apply</button>
+      <button className="apply-btn">اعمال</button>
     </div>
   );
 }

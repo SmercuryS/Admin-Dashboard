@@ -9,12 +9,12 @@ export default function Header() {
         <img src={logo} alt="Logo" style={{ width: 120 }} />
       </div>
 
-      <div className="tabs">
+      {/* <div className="tabs">
         <button>Tab 1</button>
         <button>Tab 2</button>
         <button>Tab 3</button>
         <button>Tab 4</button>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -8,11 +8,14 @@
   box-sizing: border-box;
   margin-left: 200px;
   margin-right: 200px;
+  border-color: black;
+  border: black;
 }
 
 .map-style {
   width: 60%;
   height: 100%;
+  border-color: black;
 }
 
 .layer-buttons button {
@@ -26,11 +29,19 @@
 
 .layer-buttons button:hover {
   background: #ddd;
+  cursor: pointer;
 }
 
 .active-btn {
-  background: #0066ff;
-  color: rgb(90, 121, 224);
+  color: rgb(41, 78, 199);
   border-color: #004ad1;
-  font: bold;
+  font-weight: 700;
+  cursor: pointer;
+  width: 150px;
+  height: 50px;
+}
+
+.layer-buttons button,
+button {
+  cursor: pointer;
 }
