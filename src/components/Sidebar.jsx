@@ -100,7 +100,7 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="جستجوی برچسب پولیگان ..."
+            placeholder=". . . جستجوی برچسب پولیگان"
             className="search-input"
             dir="auto"
             onKeyPress={(e) => e.key === "Enter" && handleSearch()}

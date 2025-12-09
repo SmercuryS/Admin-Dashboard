@@ -1,18 +1,41 @@
 .map-card {
   width: 400px;
-  height: 670px;
+  height: 660px;
   background: rgb(219, 255, 209);
   padding: 10px;
   display: block;
   box-sizing: border-box;
-  margin-left: 5px;
+  margin-left: -10px;
   margin-right: 200px;
-  margin-top: 20px;
+  margin-top: 60px;
   border-color: black;
   border: 1px solid black;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   flex: 1;
+}
+
+/* Add to your existing map.css file */
+.map-btn.clear-btn {
+  background-color: #ff6b6b;
+  color: white;
+  border: 1px solid #ff5252;
+}
+
+.map-btn.clear-btn:hover {
+  background-color: #ff5252;
+}
+
+.map-btn.clear-btn:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  border-color: #cccccc;
+}
+
+.selected-polygon {
+  color: #ff0000;
+  font-weight: bold;
 }
 
 .map-container {
@@ -21,6 +44,7 @@
   border: 1px solid #000000;
   border-radius: 4px;
   overflow: hidden;
+  margin-top: -10px;
 }
 
 .leaflet-map {

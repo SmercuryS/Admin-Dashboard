@@ -13,34 +13,44 @@ import "./styles/table.css";
 import "./styles/App.css";
 
 function App() {
-  // State to manage polygons data that will be shared with Sidebar
   const [savedPolygons, setSavedPolygons] = useState(null);
+  const [selectedPolygon, setSelectedPolygon] = useState(null);
 
-  // Function to update polygons data from IranMap
   const handlePolygonsUpdate = (polygonsData) => {
     setSavedPolygons(polygonsData);
   };
 
+  const handlePolygonSelect = (polygon) => {
+    console.log("Polygon selected from sidebar:", polygon);
+    setSelectedPolygon(polygon);
+  };
+
   return (
-    <div className="dashboard-container">
+    <div
+      className="app-container"
+      style={{
+        margin: 0,
+        padding: 0,
+        width: "100vw",
+        minHeight: "100vh",
+        overflowX: "hidden",
+      }}
+    >
       <Header />
 
       <div className="middle-section">
-        {/* Pass polygons data to Sidebar for searching */}
         <Sidebar
           polygons={savedPolygons}
-          // No onPolygonSelect needed since we're not highlighting
+          onPolygonSelect={handlePolygonSelect}
         />
 
         <div className="map-wrapper">
-          {/* IranMap will update polygons data when they change */}
-          <IranMap onPolygonsUpdate={handlePolygonsUpdate} />
+          <IranMap
+            onPolygonsUpdate={handlePolygonsUpdate}
+            selectedPolygon={selectedPolygon}
+          />
         </div>
       </div>
-      {/* <div className="bottom-section">
-        <Charts />
-        <DataTable />
-      </div> */}
     </div>
   );
 }
