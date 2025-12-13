@@ -11,15 +11,25 @@
     "dev:all": "concurrently \"npm run dev\" \"npm run server\""
   },
   "dependencies": {
+    "@mdi/font": "^4.9.95",
     "body-parser": "^2.2.1",
+    "bootstrap": "^4.3.1",
+    "compass-mixins": "^0.12.12",
     "cors": "^2.8.5",
     "express": "^5.2.1",
+    "i18next": "^25.7.2",
+    "i18next-browser-languagedetector": "^8.2.0",
     "leaflet": "^1.9.4",
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "leaflet-draw": "^1.0.4",
     "react": "^19.2.0",
+    "react-bootstrap": "^1.0.0-beta.12",
     "react-dom": "^19.2.0",
-    "react-leaflet": "^5.0.0"
+    "react-helmet": "^6.1.0",
+    "react-i18next": "^16.4.1",
+    "react-jvectormap": "^0.0.15",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.10.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",

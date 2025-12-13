@@ -91,186 +91,232 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
   };
 
   return (
-    <div className="sidebar">
-      {/* SEARCH SECTION */}
-      <div className="search-section">
-        <h3>جستجوی پولیگان</h3>
-        <div className="search-input-group">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder=". . . جستجوی برچسب پولیگان"
-            className="search-input"
-            dir="auto"
-            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-          />
-          <div className="search-buttons">
-            <button
-              onClick={handleSearch}
-              className="search-btn"
-              disabled={!searchQuery.trim()}
-            >
-              جستجو
+    <nav className="sidebar sidebar-offcanvas" id="sidebar">
+      <div className="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+        <a className="sidebar-brand brand-logo">
+          <span>نقشه پولیگان</span>
+        </a>
+        <a className="sidebar-brand brand-logo-mini" href="index.html">
+          <span>نقشه</span>
+        </a>
+      </div>
+      <ul className="nav">
+        {/* SEARCH SECTION */}
+        <li className="nav-item menu-items">
+          <div className="search-section">
+            <div className="search-input-group">
+              <div className="input-with-icon">
+                <i className="mdi mdi-magnify"></i>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="جستجوی برچسب پولیگان ..."
+                  className="search-input"
+                  dir="auto"
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                />
+              </div>
+              <div className="search-buttons">
+                <button
+                  onClick={handleSearch}
+                  className="search-btn"
+                  disabled={!searchQuery.trim()}
+                >
+                  <i className="mdi mdi-magnify"></i>
+                  جستجو
+                </button>
+                {searchQuery && (
+                  <button onClick={clearSearch} className="clear-btn">
+                    <i className="mdi mdi-close"></i>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Search Results */}
+            {searchResults.length > 0 && (
+              <div className="search-results">
+                <div className="results-header">
+                  <span>{searchResults.length} نتیجه یافت شد:</span>
+                  <button onClick={clearSearch} className="small-clear-btn">
+                    <i className="mdi mdi-close"></i>
+                  </button>
+                </div>
+                <div className="results-list">
+                  {searchResults.map((polygon) => (
+                    <div
+                      key={polygon.id || polygon.properties?.id}
+                      className={`result-item ${
+                        selectedResult?.id === polygon.id ? "active" : ""
+                      }`}
+                      onClick={() => handleResultClick(polygon)}
+                    >
+                      <div className="menu-icon">
+                        <i className="mdi mdi-map-marker"></i>
+                      </div>
+                      <div className="result-content">
+                        <span className="menu-title">
+                          {polygon.properties?.label || "بدون نام"}
+                        </span>
+                        <span className="result-code">
+                          {polygon.properties?.code || "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {polygons && polygons.features.length === 0 && (
+              <div className="no-data-message">
+                <i className="mdi mdi-map-outline"></i>
+                هنوز پولیگانی وجود ندارد.
+              </div>
+            )}
+          </div>
+        </li>
+
+        {/* ALL POLYGONS LIST SECTION */}
+        <li className="nav-item menu-items">
+          <div
+            className={`nav-link ${showAllPolygons ? "menu-expanded" : ""}`}
+            onClick={toggleAllPolygons}
+            style={{ cursor: "pointer" }}
+          >
+            <span className="menu-icon">
+              <i className="mdi mdi-format-list-bulleted"></i>
+            </span>
+            <span className="menu-title">لیست پولیگان‌ها</span>
+            <i className="menu-arrow"></i>
+          </div>
+
+          {showAllPolygons && polygons && polygons.features.length > 0 && (
+            <ul className="nav flex-column sub-menu">
+              <div className="results-header">
+                <span>کل پولیگان‌ها: {polygons.features.length}</span>
+              </div>
+              {polygons.features.map((polygon) => (
+                <li
+                  key={polygon.id || polygon.properties?.id}
+                  className="nav-item"
+                >
+                  <div
+                    className={`nav-link ${
+                      selectedResult?.id === polygon.id ? "active" : ""
+                    }`}
+                    onClick={() => handleAllPolygonClick(polygon)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <span className="menu-icon">
+                      <i className="mdi mdi-map-marker"></i>
+                    </span>
+                    <span className="menu-title">
+                      {polygon.properties?.label || "بدون نام"}
+                    </span>
+                    <span className="result-code">
+                      ({polygon.properties?.code || "N/A"})
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {showAllPolygons && polygons && polygons.features.length === 0 && (
+            <div className="no-data-message">
+              <i className="mdi mdi-map-outline"></i>
+              هنوز پولیگانی وجود ندارد.
+            </div>
+          )}
+        </li>
+
+        <li className="nav-item nav-category">
+          <span className="nav-link">برچسب‌گذاری</span>
+        </li>
+
+        {/* TAGS SECTION */}
+        <li className="nav-item menu-items">
+          {/* <div className="nav-link">
+            <span className="menu-icon">
+              <i className="mdi mdi-tag-multiple"></i>
+            </span>
+            <span className="menu-title">برچسب‌ها</span>
+          </div> */}
+          <div className="tags-section">
+            <select className="form-control droppers">
+              {options.map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+
+            <select className="form-control droppers">
+              {options.map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+
+            <select className="form-control droppers">
+              {options.map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+
+            <select className="form-control droppers">
+              {options.map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+          </div>
+        </li>
+
+        {/* PROVINCES SECTION */}
+        <li className="nav-item menu-items">
+          <div className="nav-link">
+            <span className="menu-icon">
+              <i className="mdi mdi-map"></i>
+            </span>
+            <span className="menu-title">استان‌ها</span>
+          </div>
+          <div className="provinces-section">
+            {/* STATIC FIRST DROPPER */}
+            <select className="form-control droppers">
+              {provinceOptions.map((p) => (
+                <option key={p}>{p}</option>
+              ))}
+            </select>
+
+            {provinceSelects.map((item) => (
+              <div key={item.id} className="dynamic-row">
+                <select className="form-control droppers">
+                  {provinceOptions.map((p) => (
+                    <option key={p}>{p}</option>
+                  ))}
+                </select>
+
+                <button
+                  className="trash-btn"
+                  onClick={() => removeProvinceSelect(item.id)}
+                >
+                  <i className="mdi mdi-delete"></i>
+                </button>
+              </div>
+            ))}
+
+            {/* + BUTTON ONLY FOR PROVINCE SECTION */}
+            <button className="add-btn" onClick={addProvinceSelect}>
+              <i className="mdi mdi-plus"></i>
+              افزودن استان
+            </button>
+
+            <button className="apply-btn">
+              <i className="mdi mdi-check"></i>
+              اعمال فیلترها
             </button>
           </div>
-        </div>
-
-        {/* Search Results */}
-        {searchResults.length > 0 && (
-          <div className="search-results">
-            <div className="results-header">
-              <span>{searchResults.length} نتیجه یافت شد:</span>
-              <button onClick={clearSearch} className="small-clear-btn">
-                ×
-              </button>
-            </div>
-            <div className="results-list">
-              {searchResults.map((polygon) => (
-                <div
-                  key={polygon.id || polygon.properties?.id}
-                  className={`result-item ${
-                    selectedResult?.id === polygon.id ? "selected" : ""
-                  }`}
-                  onClick={() => handleResultClick(polygon)}
-                  title={`کد: ${polygon.properties?.code || "بدون کد"}`}
-                >
-                  <span className="result-label">
-                    {polygon.properties?.label || "بدون نام"}
-                  </span>
-                  <span className="result-code">
-                    ({polygon.properties?.code || "N/A"})
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Display message if no polygons yet */}
-        {!polygons && (
-          <div className="no-data-message">منتظر بارگذاری پولیگان ها ...</div>
-        )}
-
-        {polygons && polygons.features.length === 0 && (
-          <div className="no-data-message">
-            هنوز پولیگانی وجود ندارد. اولین پولیگان را روی نقشه ایجاد کنید.
-          </div>
-        )}
-      </div>
-
-      <hr className="divider" />
-
-      {/* ALL POLYGONS LIST SECTION */}
-      <div className="all-polygons-section">
-        <div className="section-header">
-          <h3>لیست پولیگان‌ها</h3>
-          <button
-            className="toggle-btn"
-            onClick={toggleAllPolygons}
-            title={showAllPolygons ? "بستن لیست" : "نمایش لیست"}
-          >
-            {showAllPolygons ? "▲" : "▼"}
-          </button>
-        </div>
-
-        {showAllPolygons && polygons && polygons.features.length > 0 && (
-          <div className="all-polygons-list">
-            <div className="results-header">
-              <span>کل پولیگان‌ها: {polygons.features.length}</span>
-            </div>
-            <div className="results-list">
-              {polygons.features.map((polygon) => (
-                <div
-                  key={polygon.id || polygon.properties?.id}
-                  className={`result-item ${
-                    selectedResult?.id === polygon.id ? "selected" : ""
-                  }`}
-                  onClick={() => handleAllPolygonClick(polygon)}
-                  title={`کد: ${polygon.properties?.code || "بدون کد"}`}
-                >
-                  <span className="result-label">
-                    {polygon.properties?.label || "بدون نام"}
-                  </span>
-                  <span className="result-code">
-                    ({polygon.properties?.code || "N/A"})
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {showAllPolygons && polygons && polygons.features.length === 0 && (
-          <div className="no-data-message">
-            هنوز پولیگانی وجود ندارد. اولین پولیگان را روی نقشه ایجاد کنید.
-          </div>
-        )}
-      </div>
-
-      <hr className="divider" />
-
-      {/* Existing dropdowns section */}
-      <h3>برچسب ها</h3>
-
-      {/* FIXED TOP DROPDOWNS */}
-      <select className="droppers">
-        {options.map((o) => (
-          <option key={o}>{o}</option>
-        ))}
-      </select>
-
-      <select className="droppers">
-        {options.map((o) => (
-          <option key={o}>{o}</option>
-        ))}
-      </select>
-
-      <select className="droppers">
-        {options.map((o) => (
-          <option key={o}>{o}</option>
-        ))}
-      </select>
-
-      <select className="droppers">
-        {options.map((o) => (
-          <option key={o}>{o}</option>
-        ))}
-      </select>
-
-      {/* ------- ONLY THIS SECTION IS DYNAMIC ------- */}
-      <h3>استان ها</h3>
-
-      {/* STATIC FIRST DROPPER */}
-      <select className="droppers">
-        {provinceOptions.map((p) => (
-          <option key={p}>{p}</option>
-        ))}
-      </select>
-
-      {provinceSelects.map((item) => (
-        <div key={item.id} className="dynamic-row">
-          <select className="droppers">
-            {provinceOptions.map((p) => (
-              <option key={p}>{p}</option>
-            ))}
-          </select>
-
-          <button
-            className="trash-btn"
-            onClick={() => removeProvinceSelect(item.id)}
-          >
-            ❌
-          </button>
-        </div>
-      ))}
-
-      {/* + BUTTON ONLY FOR PROVINCE SECTION */}
-      <button className="add-btn" onClick={addProvinceSelect}>
-        +
-      </button>
-
-      <button className="apply-btn">اعمال</button>
-    </div>
+        </li>
+      </ul>
+    </nav>
   );
 }

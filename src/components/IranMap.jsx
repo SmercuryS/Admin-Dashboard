@@ -39,12 +39,18 @@ const generateUniqueId = (polygonsRef) => {
   return newId;
 };
 
+// Function to check if polygon bounds intersect with rectangle bounds
+const polygonIntersectsRectangle = (polygonBounds, rectangleBounds) => {
+  return polygonBounds.intersects(rectangleBounds);
+};
+
 function attachPolygonMenu(
   layer,
   polygonsRef,
   updateSavedPolygons,
   onPolygonSelect,
-  selectedPolygonId
+  selectedPolygonId,
+  onMultiSelect
 ) {
   if (!layer._leaflet_id) {
     layer._leaflet_id = Math.floor(Math.random() * 9999999);
@@ -126,7 +132,14 @@ function attachPolygonMenu(
 
   // Handle polygon click
   layer.on("click", (e) => {
-    // Stop the event from bubbling up to the map
+    // If multi-select mode is active, add to selection
+    if (onMultiSelect && e.originalEvent.ctrlKey) {
+      e.originalEvent.stopPropagation();
+      onMultiSelect(polygonId);
+      return;
+    }
+
+    // Otherwise, normal single selection
     e.originalEvent.stopPropagation();
 
     const polygon = polygonsRef.current.find((p) => p.id === polygonId);
@@ -500,6 +513,134 @@ function DrawTools({ polygonsRef, updateSavedPolygons, onPolygonSelect }) {
   return null;
 }
 
+/* ============= RECTANGLE SELECTION HANDLER ================== */
+/* ============= RECTANGLE SELECTION HANDLER ================== */
+function RectangleSelectionTool({ polygonsRef, onMultiSelect, isActive }) {
+  const map = useMap();
+  const rectangleLayerRef = useRef(null);
+  const startPointRef = useRef(null);
+  const rectangleRef = useRef(null);
+  const isDrawingRef = useRef(false);
+
+  useEffect(() => {
+    if (!isActive) {
+      // Clean up if rectangle is drawn
+      if (rectangleLayerRef.current) {
+        rectangleLayerRef.current.remove();
+        rectangleLayerRef.current = null;
+      }
+      return;
+    }
+
+    // Prevent context menu (right-click menu) when in selection mode
+    const preventContextMenu = (e) => {
+      e.preventDefault();
+    };
+
+    // Add context menu prevention to the map container
+    const mapContainer = map.getContainer();
+    mapContainer.addEventListener("contextmenu", preventContextMenu);
+
+    const handleMouseDown = (e) => {
+      // Only handle RIGHT mouse button (button === 2)
+      if (e.originalEvent.button !== 2) return;
+
+      e.originalEvent.preventDefault();
+      e.originalEvent.stopPropagation();
+
+      startPointRef.current = e.latlng;
+      isDrawingRef.current = true;
+
+      // Remove any existing rectangle
+      if (rectangleLayerRef.current) {
+        rectangleLayerRef.current.remove();
+      }
+
+      // Create a new rectangle layer
+      rectangleRef.current = L.rectangle(
+        [startPointRef.current, startPointRef.current],
+        {
+          color: "#3388ff",
+          weight: 2,
+          fillColor: "#3388ff",
+          fillOpacity: 0.1,
+          interactive: false,
+        }
+      ).addTo(map);
+      rectangleLayerRef.current = rectangleRef.current;
+    };
+
+    const handleMouseMove = (e) => {
+      if (!isDrawingRef.current || !startPointRef.current) return;
+
+      const bounds = L.latLngBounds(startPointRef.current, e.latlng);
+      rectangleRef.current.setBounds(bounds);
+    };
+
+    const handleMouseUp = (e) => {
+      // Only handle RIGHT mouse button (button === 2)
+      if (e.originalEvent.button !== 2) return;
+
+      if (!isDrawingRef.current || !startPointRef.current) return;
+
+      e.originalEvent.preventDefault();
+      e.originalEvent.stopPropagation();
+
+      isDrawingRef.current = false;
+      const endPoint = e.latlng;
+      const selectionBounds = L.latLngBounds(startPointRef.current, endPoint);
+
+      // Find polygons that intersect with the selection rectangle
+      const selectedPolygonIds = [];
+
+      // We need to get all polygon layers from the map
+      map.eachLayer((layer) => {
+        if (layer.polygonId && layer.getBounds) {
+          const polygonBounds = layer.getBounds();
+          if (polygonIntersectsRectangle(polygonBounds, selectionBounds)) {
+            selectedPolygonIds.push(layer.polygonId);
+          }
+        }
+      });
+
+      // Call the multi-select callback with selected polygon IDs
+      if (selectedPolygonIds.length > 0 && onMultiSelect) {
+        onMultiSelect(selectedPolygonIds);
+      }
+
+      // Remove the rectangle after a short delay
+      setTimeout(() => {
+        if (rectangleLayerRef.current) {
+          rectangleLayerRef.current.remove();
+          rectangleLayerRef.current = null;
+        }
+      }, 300);
+
+      startPointRef.current = null;
+    };
+
+    // Add event listeners for RIGHT CLICK
+    map.on("mousedown", handleMouseDown);
+    map.on("mousemove", handleMouseMove);
+    map.on("mouseup", handleMouseUp);
+
+    // Clean up
+    return () => {
+      mapContainer.removeEventListener("contextmenu", preventContextMenu);
+      map.off("mousedown", handleMouseDown);
+      map.off("mousemove", handleMouseMove);
+      map.off("mouseup", handleMouseUp);
+
+      if (rectangleLayerRef.current) {
+        rectangleLayerRef.current.remove();
+        rectangleLayerRef.current = null;
+      }
+    };
+  }, [map, isActive, onMultiSelect]);
+
+  return null;
+}
+
 /* ============= MAIN COMPONENT ===================== */
 export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
   const [layers, setLayers] = useState([]);
@@ -508,6 +649,9 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
   const polygonsRef = useRef([]);
   const [forceUpdate, setForceUpdate] = useState(0);
   const [internalSelectedPolygon, setInternalSelectedPolygon] = useState(null);
+  const [multiSelectedPolygonIds, setMultiSelectedPolygonIds] = useState([]);
+  const [isRectangleSelectMode, setIsRectangleSelectMode] = useState(false);
+  const [showMultiDeletePopup, setShowMultiDeletePopup] = useState(false);
   const mapRef = useRef(null);
   const layerRefs = useRef({});
   const updateStyleFunctions = useRef({});
@@ -523,6 +667,9 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
 
     // Store the selected polygon
     setInternalSelectedPolygon(polygon);
+
+    // Clear multi-selection when single selecting
+    setMultiSelectedPolygonIds([]);
 
     // Zoom to the polygon if it exists
     if (polygon && polygon.geometry) {
@@ -545,6 +692,67 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
       if (updateFn) updateFn();
     });
   }, []);
+
+  // Function to handle multi-selection
+  const handleMultiSelect = useCallback((polygonIds) => {
+    console.log("🔘 Multi-selection:", polygonIds);
+
+    if (Array.isArray(polygonIds)) {
+      // Rectangle selection
+      setMultiSelectedPolygonIds(polygonIds);
+      setInternalSelectedPolygon(null);
+
+      // Show multi-delete popup if we have selected polygons
+      if (polygonIds.length > 0) {
+        setShowMultiDeletePopup(true);
+      }
+    } else {
+      // Single polygon toggle (for Ctrl+click)
+      const polygonId = polygonIds;
+      setMultiSelectedPolygonIds((prev) => {
+        if (prev.includes(polygonId)) {
+          return prev.filter((id) => id !== polygonId);
+        } else {
+          return [...prev, polygonId];
+        }
+      });
+      setInternalSelectedPolygon(null);
+    }
+
+    // Update all polygon styles
+    Object.values(updateStyleFunctions.current).forEach((updateFn) => {
+      if (updateFn) updateFn();
+    });
+  }, []);
+
+  // Function to update polygon style based on selection
+  const getPolygonStyle = useCallback(
+    (polygonId) => {
+      if (internalSelectedPolygon?.id === polygonId) {
+        return {
+          color: "#FF0000",
+          weight: 4,
+          fillColor: "#FF0000",
+          fillOpacity: 0.3,
+        };
+      } else if (multiSelectedPolygonIds.includes(polygonId)) {
+        return {
+          color: "#FFA500", // Orange for multi-selected
+          weight: 4,
+          fillColor: "#FFA500",
+          fillOpacity: 0.3,
+        };
+      } else {
+        return {
+          color: "#FF4081",
+          weight: 3,
+          fillColor: "#FF4081",
+          fillOpacity: 0.3,
+        };
+      }
+    },
+    [internalSelectedPolygon, multiSelectedPolygonIds]
+  );
 
   // Handle external polygon selection from parent
   useEffect(() => {
@@ -589,7 +797,12 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
     // Simple map click handler - clears selection when clicking anywhere on map
     const handleMapClick = () => {
       console.log("🗺️ Map clicked, clearing selection");
-      handlePolygonSelect(null);
+      setInternalSelectedPolygon(null);
+      setMultiSelectedPolygonIds([]);
+      setShowMultiDeletePopup(false);
+      Object.values(updateStyleFunctions.current).forEach((updateFn) => {
+        if (updateFn) updateFn();
+      });
     };
 
     map.on("click", handleMapClick);
@@ -597,7 +810,48 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
     return () => {
       map.off("click", handleMapClick);
     };
-  }, [handlePolygonSelect]);
+  }, []);
+
+  // Function to delete multiple polygons
+  const deleteSelectedPolygons = () => {
+    if (multiSelectedPolygonIds.length === 0) return;
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${multiSelectedPolygonIds.length} selected polygon(s)?`
+    );
+
+    if (!confirmDelete) return;
+
+    const beforeCount = polygonsRef.current.length;
+
+    // Remove selected polygons from the array
+    polygonsRef.current = polygonsRef.current.filter(
+      (polygon) => !multiSelectedPolygonIds.includes(polygon.id)
+    );
+
+    // Remove the layers from the map
+    multiSelectedPolygonIds.forEach((polygonId) => {
+      const layer = layerRefs.current[polygonId];
+      if (layer) {
+        layer.remove();
+        delete layerRefs.current[polygonId];
+        delete updateStyleFunctions.current[polygonId];
+      }
+    });
+
+    const afterCount = polygonsRef.current.length;
+
+    console.log(
+      `🗑️ Deleted ${multiSelectedPolygonIds.length} polygons. Before: ${beforeCount}, After: ${afterCount}`
+    );
+
+    // Clear selection and hide popup
+    setMultiSelectedPolygonIds([]);
+    setShowMultiDeletePopup(false);
+
+    // Update saved polygons
+    updateSavedPolygons();
+  };
 
   // Clean up refs on unmount
   useEffect(() => {
@@ -701,6 +955,7 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
       alert(`✅ ${result.message}\nSaved ${result.count} polygons`);
 
       handlePolygonSelect(null);
+      setMultiSelectedPolygonIds([]);
 
       setTimeout(() => {
         window.location.reload();
@@ -949,13 +1204,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
     { color: "#06f", weight: 2, fillOpacity: 0 },
   ];
 
-  const polygonStyle = {
-    color: "#FF4081",
-    weight: 3,
-    fillColor: "#FF4081",
-    fillOpacity: 0.3,
-  };
-
   const labels = ["ایران", "استان‌ها", "شهرستان‌ها"];
 
   return (
@@ -975,14 +1223,77 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
           Download Polygons (JSON)
         </button>
 
-        <button onClick={savePolygonsToServer} className="map-btn save-btn">
-          Save to Server
-        </button>
-
         <button onClick={refreshData} className="map-btn refresh-btn">
           Refresh Data
         </button>
+
+        {/* Rectangle Selection Button */}
+        <button
+          onClick={() => {
+            setIsRectangleSelectMode(!isRectangleSelectMode);
+            setShowMultiDeletePopup(false);
+            if (!isRectangleSelectMode) {
+              setMultiSelectedPolygonIds([]);
+            }
+          }}
+          className={`map-btn rectangle-select-btn ${
+            isRectangleSelectMode ? "active" : ""
+          }`}
+          // style={{
+          //   backgroundColor: isRectangleSelectMode
+          //     ? "rgba(255, 45, 80, 1)ff"
+          //     : "#2d2d38",
+          //   color: "white",
+          // }}
+        >
+          {isRectangleSelectMode
+            ? "✋ Cancel Selection"
+            : "⬛ Rectangle Select (Right-Click)"}
+        </button>
+
+        {/* Delete Selected Button */}
+        {multiSelectedPolygonIds.length > 0 && (
+          <button
+            onClick={deleteSelectedPolygons}
+            className="map-btn delete-selected-btn"
+            style={{
+              backgroundColor: "#f44336",
+              color: "white",
+            }}
+          >
+            🗑️ Delete Selected ({multiSelectedPolygonIds.length})
+          </button>
+        )}
+        <button onClick={savePolygonsToServer} className="map-btn save-btn">
+          Save to Server
+        </button>
       </div>
+
+      {/* Multi-Delete Popup */}
+      {showMultiDeletePopup && multiSelectedPolygonIds.length > 0 && (
+        <div className="multi-delete-popup">
+          <div className="popup-content">
+            <h3>Delete Selected Polygons?</h3>
+            <p>
+              You have selected {multiSelectedPolygonIds.length} polygon(s).
+            </p>
+            <div className="popup-actions">
+              <button
+                onClick={deleteSelectedPolygons}
+                className="popup-btn delete-btn"
+              >
+                🗑️ Delete All
+              </button>
+              <button
+                onClick={() => setShowMultiDeletePopup(false)}
+                className="popup-btn cancel-btn"
+              >
+                ✋ Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="map-container">
         <MapContainer
@@ -1022,17 +1333,301 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
                 // Store layer reference
                 layerRefs.current[polygonId] = layer;
 
+                // Apply initial style
+                layer.setStyle(getPolygonStyle(polygonId));
+
                 // Get update function and store it
-                const updateFn = attachPolygonMenu(
-                  layer,
-                  polygonsRef,
-                  updateSavedPolygons,
-                  handlePolygonSelect,
-                  internalSelectedPolygon?.id
-                );
+                const updateFn = () => {
+                  layer.setStyle(getPolygonStyle(polygonId));
+                };
                 updateStyleFunctions.current[polygonId] = updateFn;
+
+                // Attach menu (without passing selectedPolygonId since we handle styling separately)
+                const attachMenuFn = () => {
+                  // Create popup content
+                  const polygon = polygonsRef.current.find(
+                    (p) => p.id === polygonId
+                  );
+                  const code = polygon?.code || "";
+                  const label = polygon?.label || "";
+
+                  const popupContent = `
+                    <div class="polygon-popup">
+                      <div class="popup-header">
+                        <strong>Label:</strong> ${label}<br>
+                        <strong>Code:</strong> ${code}<br>
+                        <small>ID: ${polygonId}</small>
+                      </div>
+                      <button id="edit-btn-${polygonId}" class="popup-btn edit-btn">Edit Shape</button>
+                      <button id="save-btn-${polygonId}" class="popup-btn save-btn" style="display:none;">Save Changes</button>
+                      <button id="properties-btn-${polygonId}" class="popup-btn properties-btn">Edit Properties</button>
+                      <button id="delete-btn-${polygonId}" class="popup-btn delete-btn">Delete</button>
+                    </div>
+                  `;
+
+                  layer.bindPopup(popupContent);
+
+                  // Handle polygon click
+                  layer.off("click"); // Remove previous handlers
+                  layer.on("click", (e) => {
+                    // If rectangle select mode is active, add to multi-selection
+                    if (isRectangleSelectMode) {
+                      e.originalEvent.stopPropagation();
+                      handleMultiSelect(polygonId);
+                      return;
+                    }
+
+                    // If Ctrl key is pressed, add to multi-selection
+                    if (e.originalEvent.ctrlKey) {
+                      e.originalEvent.stopPropagation();
+                      handleMultiSelect(polygonId);
+                      return;
+                    }
+
+                    // Otherwise, normal single selection
+                    e.originalEvent.stopPropagation();
+
+                    const polygon = polygonsRef.current.find(
+                      (p) => p.id === polygonId
+                    );
+                    if (polygon) {
+                      const feature = {
+                        type: "Feature",
+                        geometry: polygon.geometry,
+                        properties: {
+                          code: polygon.code,
+                          label: polygon.label,
+                          id: polygon.id,
+                        },
+                        id: polygon.id,
+                      };
+                      handlePolygonSelect(feature);
+                    }
+
+                    layer.openPopup();
+                  });
+
+                  // Handle popup buttons
+                  layer.on("popupopen", () => {
+                    setTimeout(() => {
+                      // Edit Shape button
+                      const editBtn = document.getElementById(
+                        `edit-btn-${polygonId}`
+                      );
+                      if (editBtn) {
+                        editBtn.onclick = (e) => {
+                          e.stopPropagation();
+                          layer.editing.enable();
+
+                          const saveBtn = document.getElementById(
+                            `save-btn-${polygonId}`
+                          );
+                          if (saveBtn) {
+                            saveBtn.style.display = "block";
+                            editBtn.style.display = "none";
+
+                            saveBtn.onclick = (e) => {
+                              e.stopPropagation();
+                              const index = polygonsRef.current.findIndex(
+                                (p) => p.id === polygonId
+                              );
+                              if (index !== -1) {
+                                const updatedGeoJSON = layer.toGeoJSON();
+                                if (updatedGeoJSON && updatedGeoJSON.geometry) {
+                                  const newGeometry = JSON.parse(
+                                    JSON.stringify(updatedGeoJSON.geometry)
+                                  );
+                                  polygonsRef.current[index].geometry =
+                                    newGeometry;
+                                  updateSavedPolygons();
+                                  console.log(
+                                    "💾 Polygon geometry saved:",
+                                    polygonId
+                                  );
+
+                                  layer.editing.disable();
+                                  saveBtn.style.display = "none";
+                                  editBtn.style.display = "block";
+                                  alert("✅ Polygon shape saved!");
+                                }
+                              }
+                            };
+                          }
+
+                          const map = layer._map;
+                          const mapClickHandler = () => {
+                            const index = polygonsRef.current.findIndex(
+                              (p) => p.id === polygonId
+                            );
+                            if (index !== -1) {
+                              const updatedGeoJSON = layer.toGeoJSON();
+                              if (updatedGeoJSON && updatedGeoJSON.geometry) {
+                                polygonsRef.current[index].geometry =
+                                  JSON.parse(
+                                    JSON.stringify(updatedGeoJSON.geometry)
+                                  );
+                                updateSavedPolygons();
+                                console.log("💾 Saved via map click");
+                              }
+                            }
+                          };
+
+                          map.on("click", mapClickHandler);
+
+                          layer.once("editable:disable", () => {
+                            map.off("click", mapClickHandler);
+                            const index = polygonsRef.current.findIndex(
+                              (p) => p.id === polygonId
+                            );
+                            if (index !== -1) {
+                              const updatedGeoJSON = layer.toGeoJSON();
+                              if (updatedGeoJSON && updatedGeoJSON.geometry) {
+                                polygonsRef.current[index].geometry =
+                                  JSON.parse(
+                                    JSON.stringify(updatedGeoJSON.geometry)
+                                  );
+                                updateSavedPolygons();
+                                console.log("💾 Saved via editable:disable");
+                              }
+                            }
+
+                            const saveBtn = document.getElementById(
+                              `save-btn-${polygonId}`
+                            );
+                            const editBtn = document.getElementById(
+                              `edit-btn-${polygonId}`
+                            );
+                            if (saveBtn && editBtn) {
+                              saveBtn.style.display = "none";
+                              editBtn.style.display = "block";
+                            }
+                          });
+                        };
+                      }
+
+                      // Edit Properties button
+                      const propertiesBtn = document.getElementById(
+                        `properties-btn-${polygonId}`
+                      );
+                      if (propertiesBtn) {
+                        propertiesBtn.onclick = (e) => {
+                          e.stopPropagation();
+                          const polygon = polygonsRef.current.find(
+                            (p) => p.id === polygonId
+                          );
+                          const currentCode = polygon?.code || "";
+                          const currentLabel = polygon?.label || "";
+
+                          const getNewValues = () => {
+                            let newCode, newLabel;
+                            let valid = false;
+
+                            while (!valid) {
+                              newCode = prompt(
+                                "Enter new code ID (must be unique):",
+                                currentCode
+                              );
+                              if (newCode === null) return null;
+
+                              newLabel = prompt(
+                                "Enter new label (must be unique):",
+                                currentLabel
+                              );
+                              if (newLabel === null) return null;
+
+                              const isCodeValid = isCodeUnique(
+                                newCode,
+                                polygonsRef,
+                                polygonId
+                              );
+                              const isLabelValid = isLabelUnique(
+                                newLabel,
+                                polygonsRef,
+                                polygonId
+                              );
+
+                              if (!isCodeValid && !isLabelValid) {
+                                alert(
+                                  "❌ Error: Both Code ID and Label already exist. Please use unique values."
+                                );
+                              } else if (!isCodeValid) {
+                                alert(
+                                  "❌ Error: Code ID already exists. Please use a unique Code ID."
+                                );
+                              } else if (!isLabelValid) {
+                                alert(
+                                  "❌ Error: Label already exists. Please use a unique Label."
+                                );
+                              } else {
+                                valid = true;
+                              }
+                            }
+
+                            return { newCode, newLabel };
+                          };
+
+                          const newValues = getNewValues();
+                          if (newValues) {
+                            const { newCode, newLabel } = newValues;
+                            const index = polygonsRef.current.findIndex(
+                              (p) => p.id === polygonId
+                            );
+                            if (index !== -1) {
+                              polygonsRef.current[index].code = newCode;
+                              polygonsRef.current[index].label = newLabel;
+
+                              // Update popup
+                              attachMenuFn();
+                              updateSavedPolygons();
+                              console.log(
+                                "📝 Polygon properties updated:",
+                                polygonId
+                              );
+                            }
+                          }
+                        };
+                      }
+
+                      // Delete button
+                      const deleteBtn = document.getElementById(
+                        `delete-btn-${polygonId}`
+                      );
+                      if (deleteBtn) {
+                        deleteBtn.onclick = (e) => {
+                          e.stopPropagation();
+                          if (
+                            confirm(
+                              "Are you sure you want to delete this polygon?"
+                            )
+                          ) {
+                            const beforeCount = polygonsRef.current.length;
+                            polygonsRef.current = polygonsRef.current.filter(
+                              (p) => p.id !== polygonId
+                            );
+                            const afterCount = polygonsRef.current.length;
+
+                            layer.remove();
+                            updateSavedPolygons();
+
+                            console.log(
+                              `🗑️ Polygon ${polygonId} deleted. Before: ${beforeCount}, After: ${afterCount}`
+                            );
+
+                            // Remove from multi-selection if it was there
+                            setMultiSelectedPolygonIds((prev) =>
+                              prev.filter((id) => id !== polygonId)
+                            );
+                            handlePolygonSelect(null);
+                          }
+                        };
+                      }
+                    }, 50);
+                  });
+                };
+
+                // Attach menu
+                attachMenuFn();
               }}
-              style={polygonStyle}
             />
           )}
 
@@ -1040,6 +1635,13 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
             polygonsRef={polygonsRef}
             updateSavedPolygons={updateSavedPolygons}
             onPolygonSelect={handlePolygonSelect}
+          />
+
+          {/* Rectangle Selection Tool */}
+          <RectangleSelectionTool
+            polygonsRef={polygonsRef}
+            onMultiSelect={handleMultiSelect}
+            isActive={isRectangleSelectMode}
           />
         </MapContainer>
       </div>
