@@ -1,18 +1,19 @@
-// src/pages/MainPage.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
+import RightSidebar from "../components/RightSidebar";
 import SimpleIranMap from "../components/SimpleIranMap";
 import "../styles/header.css";
 import "../styles/sidebar.css";
+import "../styles/rightsidebar.css";
 import "../styles/map.css";
 import "../styles/App.css";
 
 function MainPage() {
-  const navigate = useNavigate();
   const [savedPolygons, setSavedPolygons] = useState(null);
   const [selectedPolygon, setSelectedPolygon] = useState(null);
+  const [isLeftSidebarMinimized, setIsLeftSidebarMinimized] = useState(false);
+  const [isRightSidebarMinimized, setIsRightSidebarMinimized] = useState(false);
 
   const handlePolygonsUpdate = (polygonsData) => {
     setSavedPolygons(polygonsData);
@@ -23,23 +24,57 @@ function MainPage() {
     setSelectedPolygon(polygon);
   };
 
+  const handleLeftSidebarToggle = (isMinimized) => {
+    setIsLeftSidebarMinimized(isMinimized);
+  };
+
+  const handleRightSidebarToggle = (isMinimized) => {
+    setIsRightSidebarMinimized(isMinimized);
+  };
+
+  // Calculate content class based on sidebar states
+  const getContentWrapperClass = () => {
+    const classes = [];
+
+    if (!isLeftSidebarMinimized && !isRightSidebarMinimized) {
+      classes.push("with-both-sidebars");
+    } else if (isLeftSidebarMinimized && isRightSidebarMinimized) {
+      classes.push("with-both-sidebars", "both-minimized");
+    } else if (isLeftSidebarMinimized) {
+      classes.push("with-both-sidebars", "left-minimized");
+    } else if (isRightSidebarMinimized) {
+      classes.push("with-both-sidebars", "right-minimized");
+    }
+
+    return classes.join(" ");
+  };
+
   return (
     <div className="app-container">
-      <Header onEditorClick={() => navigate("/editor")} />
+      <Header />
 
-      <div className="middle-section">
-        <Sidebar
-          polygons={savedPolygons}
-          onPolygonSelect={handlePolygonSelect}
-          viewOnly={true} // Added prop to indicate view-only mode
-        />
-
-        <div className="map-wrapper">
-          <SimpleIranMap
-            onPolygonsUpdate={handlePolygonsUpdate}
-            selectedPolygon={selectedPolygon}
-            showCustomPolygons={false} // Hide custom polygons
+      <div className="app-main-wrapper">
+        <div className="left-sidebar-wrapper">
+          <Sidebar
+            polygons={savedPolygons}
+            onPolygonSelect={handlePolygonSelect}
+            viewOnly={true}
+            onToggle={handleLeftSidebarToggle}
           />
+        </div>
+
+        <div className={`map-content-wrapper ${getContentWrapperClass()}`}>
+          <div className="map-wrapper">
+            <SimpleIranMap
+              onPolygonsUpdate={handlePolygonsUpdate}
+              selectedPolygon={selectedPolygon}
+              showCustomPolygons={false}
+            />
+          </div>
+        </div>
+
+        <div className="right-sidebar-wrapper">
+          <RightSidebar onToggle={handleRightSidebarToggle} />
         </div>
       </div>
     </div>

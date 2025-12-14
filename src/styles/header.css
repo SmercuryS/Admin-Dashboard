@@ -3,7 +3,7 @@
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 0 25px;
-  background: #1e1e2d;
+  background: #363648;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
   border-bottom: 1px solid #2d2d3d;
   min-height: 70px;
@@ -37,13 +37,13 @@
   justify-content: center;
   transition: all 0.3s ease;
 }
-
+/* 
 .logo-container:hover {
   background: linear-gradient(135deg, #ffffff 0%, #e9ecef 100%);
   box-shadow: 0 6px 16px rgba(255, 255, 255, 0.15),
     0 0 0 1px rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
-}
+} */
 
 .logo-img {
   width: 35px;
@@ -60,13 +60,12 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Center Section - Fixed position */
 .header-center {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  pointer-events: none; /* Prevent interaction if needed */
+  pointer-events: none;
 }
 
 .page-title {
@@ -78,7 +77,6 @@
   white-space: nowrap;
 }
 
-/* Right Section */
 .header-right {
   display: flex;
   align-items: center;
@@ -86,14 +84,12 @@
   justify-self: end;
 }
 
-/* Header Buttons Container */
 .header-buttons {
   display: flex;
   gap: 10px;
   align-items: center;
 }
 
-/* Editor Button */
 .editor-btn {
   display: flex;
   align-items: center;
@@ -124,13 +120,12 @@
   font-size: 1rem;
 }
 
-/* Back Button (in header) */
 .header-back-btn {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  background: #6c757d;
+  background: #8f5fe8;
   color: white;
   border: none;
   border-radius: 4px;
@@ -142,7 +137,8 @@
 }
 
 .header-back-btn:hover {
-  background: #5a6268;
+  background: #e1d1fd;
+  color: #8f5fe8;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(108, 117, 125, 0.4);
 }
@@ -151,7 +147,6 @@
   transform: translateY(0);
 }
 
-/* Profile Container */
 .profile-container {
   position: relative;
 }
@@ -169,7 +164,7 @@
 }
 
 .profile-btn:hover {
-  background: #2a2a3c;
+  background: #222231;
 }
 
 .profile-info {
@@ -207,7 +202,7 @@
 }
 
 .profile-btn:hover .profile-img {
-  border-color: #3699ff;
+  border-color: #8f5fe8;
 }
 
 .profile-arrow {
@@ -225,7 +220,7 @@
   position: absolute;
   top: 100%;
   right: 0;
-  background: #2a2a3c;
+  background: #222231;
   border-radius: 8px;
   box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
   min-width: 250px;
@@ -249,7 +244,7 @@
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #3699ff;
+  border: 2px solid #8f5fe8;
 }
 
 .dropdown-user-info {
@@ -301,138 +296,5 @@
 }
 
 .dropdown-item:hover .mdi {
-  color: #3699ff;
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .header {
-    padding: 0 20px;
-  }
-}
-
-@media (max-width: 992px) {
-  .header {
-    padding: 0 15px;
-  }
-
-  .logo-text {
-    display: none;
-  }
-
-  .page-title {
-    font-size: 1rem;
-  }
-
-  .editor-btn span,
-  .header-back-btn span {
-    display: none;
-  }
-
-  .editor-btn,
-  .header-back-btn {
-    padding: 10px;
-    min-width: auto;
-  }
-
-  .editor-btn .mdi,
-  .header-back-btn .mdi {
-    margin: 0;
-    font-size: 1.2rem;
-  }
-
-  .profile-info {
-    display: none;
-  }
-
-  .profile-btn {
-    padding: 6px;
-  }
-
-  .logo-container {
-    padding: 8px;
-  }
-
-  .logo-img {
-    width: 30px;
-    height: 30px;
-  }
-}
-
-@media (max-width: 768px) {
-  .header {
-    grid-template-columns: auto 1fr auto;
-    padding: 0 10px;
-  }
-
-  .header-center {
-    position: relative;
-    left: 0;
-    transform: none;
-    text-align: center;
-    grid-column: 2;
-    pointer-events: auto;
-  }
-
-  .page-title {
-    font-size: 0.9rem;
-    text-align: center;
-  }
-
-  .header-left {
-    grid-column: 1;
-  }
-
-  .header-right {
-    grid-column: 3;
-    gap: 10px;
-  }
-
-  .editor-btn,
-  .header-back-btn {
-    padding: 8px 12px;
-    font-size: 0.75rem;
-  }
-
-  .profile-dropdown {
-    min-width: 200px;
-  }
-}
-
-@media (max-width: 480px) {
-  .header {
-    min-height: 60px;
-    padding: 0 8px;
-  }
-
-  .logo-container {
-    padding: 6px;
-  }
-
-  .logo-img {
-    width: 28px;
-    height: 28px;
-  }
-
-  .profile-img {
-    width: 35px;
-    height: 35px;
-  }
-
-  .editor-btn,
-  .header-back-btn {
-    padding: 6px 10px;
-    font-size: 0.7rem;
-  }
-
-  .page-title {
-    font-size: 0.8rem;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .header-right {
-    gap: 5px;
-  }
+  color: #8f5fe8;
 }

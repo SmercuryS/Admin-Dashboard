@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/header.css";
 import logo from "../img/logo.png";
 import profile from "../img/profile.png";
 
-export default function Header({ onEditorClick }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+export default function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleProfileClick = () => {
@@ -39,27 +36,6 @@ export default function Header({ onEditorClick }) {
       </div>
 
       <div className="header-right">
-        <div className="header-buttons">
-          {/* Show "Open Editor" button only on main page */}
-          {location.pathname === "/" && (
-            <button
-              onClick={() => navigate("/editor")}
-              className="header-action-btn editor-btn"
-            >
-              <i className="mdi mdi-pencil"></i>
-              بازکردن ادیتور
-            </button>
-          )}
-
-          {/* Show "Back to Main Map" button only on editor page */}
-          {location.pathname === "/editor" && (
-            <button onClick={() => navigate("/")} className="header-back-btn">
-              <i className="mdi mdi-arrow-left"></i>
-              بازگشت به نقشه اصلی
-            </button>
-          )}
-        </div>
-
         <div className="profile-container">
           <button
             className="profile-btn"

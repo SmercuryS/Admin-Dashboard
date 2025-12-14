@@ -1,20 +1,19 @@
 .map-card {
-  width: 400px;
-  height: 800px;
+  width: 100%;
+  height: 100%;
   background: #1e1e2d;
   padding: 15px;
-  display: block;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
-  margin-left: -10px;
-  margin-right: 200px;
-  margin-top: 200px;
   border: 1px solid #2d2d3d;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   flex: 1;
   position: relative;
   z-index: 10;
-  border-left: 3px #000000;
+  border-left: 3px solid #000000;
+  margin: 0;
 }
 
 .map-header {
@@ -24,6 +23,7 @@
   margin-bottom: 15px;
   padding-bottom: 15px;
   border-bottom: 1px solid #2d2d3d;
+  flex-shrink: 0;
 }
 
 .map-header h1 {
@@ -60,7 +60,7 @@
 }
 
 .map-container {
-  height: 720px;
+  flex: 1;
   width: 100%;
   border: 2px solid #000000;
   border-radius: 4px;
@@ -69,6 +69,7 @@
   background: #2a2a3c;
   position: relative;
   z-index: 1;
+  min-height: 0; /* Important for flex child */
 }
 
 .leaflet-map {
@@ -81,6 +82,7 @@
 
 .leaflet-container {
   background: #2a2a3c;
+  height: 100% !important;
 }
 
 .leaflet-tile {
@@ -115,6 +117,7 @@
   gap: 10px;
   flex-wrap: wrap;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .layer-btn {
@@ -127,6 +130,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .layer-btn:hover {
@@ -136,9 +140,9 @@
 }
 
 .active-btn {
-  background: #3699ff;
+  background: #8f5fe8;
   color: white;
-  border-color: #3699ff;
+  border-color: #8f5fe8;
   box-shadow: 0 2px 8px rgba(54, 153, 255, 0.3);
 }
 
@@ -156,6 +160,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  white-space: nowrap;
 }
 
 .map-btn:hover {
@@ -451,29 +456,52 @@
   }
 }
 
-@media (max-width: 1200px) {
-  .map-card {
-    margin-left: 100px;
-    margin-right: 100px;
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+  .map-controls {
+    height: auto;
+    max-height: 100px;
+  }
+
+  .map-btn {
+    min-width: 140px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
   }
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1200px) {
   .map-card {
-    width: auto;
-    height: auto;
-    min-height: 600px;
-    margin: 70px 20px 20px 20px;
+    margin: 0;
+    width: 100%;
   }
 
   .map-container {
     height: 500px;
   }
+
+  .map-controls {
+    flex-direction: column;
+    height: auto;
+  }
+}
+
+@media (max-width: 992px) {
+  .map-card {
+    width: 100%;
+    height: auto;
+    min-height: 600px;
+    margin: 0;
+  }
+
+  .map-container {
+    height: 400px;
+  }
 }
 
 @media (max-width: 768px) {
   .map-card {
-    margin: 70px 10px 10px 10px;
+    margin: 0;
   }
 
   .map-controls {
@@ -498,7 +526,7 @@
   }
 
   .map-container {
-    height: 400px;
+    height: 300px;
   }
 
   .map-header h1 {

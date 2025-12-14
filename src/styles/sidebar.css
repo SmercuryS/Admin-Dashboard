@@ -2,7 +2,7 @@
 
 /* Sidebar Main Styles */
 .sidebar {
-  min-height: 100vh;
+  min-height: 979px;
   background: #1e1e2d;
   font-weight: normal;
   padding: 0;
@@ -10,15 +10,92 @@
   z-index: 11;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
   border-right: 3px solid #000000;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
 }
 
-.sidebar {
-  background: #1e1e2d;
-  width: 280px;
-  height: 70px;
+/* Minimized sidebar styles */
+.sidebar.minimized {
+  width: 70px;
+}
+
+.sidebar.minimized .sidebar-toggle-btn .toggle-text,
+.sidebar.minimized .menu-title,
+.sidebar.minimized .nav-category,
+.sidebar.minimized .search-input-group,
+.sidebar.minimized .search-results,
+.sidebar.minimized .sub-menu,
+.sidebar.minimized .tags-section,
+.sidebar.minimized .provinces-section,
+.sidebar.minimized .no-data-message,
+.sidebar.minimized .menu-arrow,
+.sidebar.minimized .result-content,
+.sidebar.minimized .search-buttons,
+.sidebar.minimized .results-header,
+.sidebar.minimized .dynamic-row,
+.sidebar.minimized .add-btn,
+.sidebar.minimized .apply-btn,
+.sidebar.minimized .droppers {
+  display: none !important;
+}
+
+.sidebar.minimized .nav-link {
+  justify-content: center;
+  padding: 12px 15px !important;
+  margin-right: 0 !important;
+  border-radius: 0 !important;
+}
+
+.sidebar.minimized .menu-icon {
+  margin-right: 0 !important;
+}
+
+.sidebar.minimized .search-section {
+  padding: 15px 15px 0 15px;
+}
+
+/* Sidebar toggle button */
+.sidebar-toggle-container {
+  padding: 10px 15px;
   border-bottom: 1px solid #2d2d3d;
 }
-.sidebar-brand-wrapper {
+
+.sidebar-toggle-btn {
+  width: 100%;
+  padding: 8px 12px;
+  background: #2a2a3c;
+  color: #a2a3b7;
+  border: 1px solid #363648;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.sidebar-toggle-btn:hover {
+  background: #363648;
+  color: #fff;
+  border-color: #8f5fe8;
+}
+
+.sidebar.minimized .sidebar-toggle-btn {
+  justify-content: center;
+  padding: 8px;
+}
+
+.sidebar-toggle-btn .toggle-text {
+  font-size: 0.875rem;
+}
+/* 
+.sidebar.minimized .sidebar-toggle-btn .mdi {
+  transform: rotate(180deg);
+} */
+
+.sidebar .sidebar-brand-wrapper {
   background: #1b1b28;
 }
 
@@ -41,7 +118,8 @@
   overflow: hidden;
   flex-wrap: nowrap;
   flex-direction: column;
-  padding-top: 20px;
+  padding-top: 10px;
+  flex: 1;
 }
 
 /* Profile Section */
@@ -164,7 +242,7 @@
   content: "";
   width: 3px;
   height: 100%;
-  background: #3699ff;
+  background: #8f5fe8;
   display: inline-block;
   position: absolute;
   left: 0;
@@ -186,7 +264,7 @@
 
 .sidebar .nav .nav-item.menu-items .nav-link:hover .menu-icon,
 .sidebar .nav .nav-item.menu-items .nav-link.active .menu-icon {
-  color: #3699ff;
+  color: #8f5fe8;
 }
 
 .sidebar .nav .nav-item.menu-items .nav-link .menu-title {
@@ -253,7 +331,7 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #3699ff;
+  border-color: #8f5fe8;
   background: #2d2d40;
 }
 
@@ -269,7 +347,7 @@
 .search-btn {
   flex: 1;
   padding: 10px 15px;
-  background: #3699ff;
+  background: #8f5fe8;
   color: white;
   border: none;
   border-radius: 4px;
@@ -366,7 +444,7 @@
 
 .result-item.active {
   background: #1b1b28;
-  border-left: 3px solid #3699ff;
+  border-left: 3px solid #8f5fe8;
 }
 
 .result-item .menu-icon {
@@ -381,7 +459,7 @@
 }
 
 .result-item.active .menu-icon {
-  color: #3699ff;
+  color: #8f5fe8;
 }
 
 .result-item .result-content {
@@ -427,7 +505,7 @@
 }
 
 .nav.flex-column.sub-menu .nav-item .nav-link.active {
-  background: #3699ff;
+  background: #8f5fe8;
   color: #fff;
 }
 
@@ -451,7 +529,7 @@
 
 .droppers:focus {
   outline: none;
-  border-color: #3699ff;
+  border-color: #8f5fe8;
   background: #2d2d40;
 }
 
@@ -489,8 +567,8 @@
   width: 100%;
   padding: 12px 15px;
   margin: 15px 0;
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: #dcffdf;
+  color: #347937;
   border: 1px solid #c8e6c9;
   border-radius: 4px;
   cursor: pointer;
@@ -504,16 +582,17 @@
 }
 
 .add-btn:hover {
-  background: #c8e6c9;
-  color: #1b5e20;
+  background: #58ac5d;
+  color: #e8f5e9;
+  border-color: #58ac5d;
 }
 
 .apply-btn {
   width: 100%;
   padding: 12px 15px;
   margin: 20px 0 10px;
-  background: #3699ff;
-  color: white;
+  background: #bddeff;
+  color: #0080ff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -527,7 +606,8 @@
 }
 
 .apply-btn:hover {
-  background: #2980ff;
+  background: #0080ff;
+  color: #bddeff;
 }
 
 /* No Data Message */
@@ -559,6 +639,11 @@
     transition: right 0.3s ease-out;
   }
 
+  .sidebar.minimized {
+    width: 70px;
+    right: -70px;
+  }
+
   .sidebar.active {
     right: 0;
   }
@@ -566,4 +651,63 @@
   .sidebar .sidebar-brand-wrapper {
     width: 280px;
   }
+}
+
+/* Tooltip for minimized icons */
+.nav-link.minimized-icon {
+  position: relative;
+}
+
+.nav-link.minimized-icon:hover::after {
+  content: attr(title);
+  position: fixed;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #2a2a3c;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  border: 1px solid #363648;
+}
+/* 
+----------------------------------------------------------- */
+/* Arrow rotation for left sidebar */
+.sidebar .sidebar-toggle-btn .mdi-chevron-right,
+.sidebar .sidebar-toggle-btn .mdi-chevron-left {
+  transition: transform 0.3s ease;
+}
+
+.sidebar.minimized .sidebar-toggle-btn .mdi-chevron-right {
+  transform: rotate(0deg); /* Points right */
+}
+
+.sidebar .sidebar-toggle-btn .mdi-chevron-left {
+  transform: rotate(0deg); /* Points left */
+}
+
+/* Arrow rotation for right sidebar */
+.right-sidebar .sidebar-toggle-btn .mdi-chevron-right,
+.right-sidebar .sidebar-toggle-btn .mdi-chevron-left {
+  transition: transform 0.3s ease;
+}
+
+.right-sidebar.minimized .sidebar-toggle-btn .mdi-chevron-left {
+  transform: rotate(0deg); /* Points left */
+}
+
+.right-sidebar .sidebar-toggle-btn .mdi-chevron-right {
+  transform: rotate(0deg); /* Points right */
+}
+
+/* Remove any previous rotation rules if they exist */
+.sidebar.minimized .sidebar-toggle-btn .mdi {
+  transform: none !important; /* Remove any previous rotations */
+}
+
+.right-sidebar.minimized .sidebar-toggle-btn .mdi {
+  transform: none !important; /* Remove any previous rotations */
 }
