@@ -103,32 +103,54 @@ export default function RightSidebar() {
           {!isSidebarMinimized && (
             <div className="status-section">
               <div className="status-item">
-                <div className="status-icon online">
-                  <i className="mdi mdi-check-circle"></i>
-                </div>
-                <div className="status-content">
-                  <span className="status-title">سیستم نقشه</span>
-                  <span className="status-value">فعال</span>
-                </div>
-              </div>
-
-              <div className="status-item">
-                <div className="status-icon warning">
-                  <i className="mdi mdi-alert"></i>
-                </div>
-                <div className="status-content">
-                  <span className="status-title">حافظه موقت</span>
-                  <span className="status-value">۷۵٪ پر</span>
-                </div>
-              </div>
-
-              <div className="status-item">
                 <div className="status-icon">
                   <i className="mdi mdi-map-marker"></i>
                 </div>
                 <div className="status-content">
-                  <span className="status-title">پولیگان‌ها</span>
-                  <span className="status-value">۱۲ مورد</span>
+                  <span className="status-title">تعداد کل پولیگان ها</span>
+                  <span className="status-value">n مورد</span>
+                  <span className="status-value">سطح زیر کشت: فلان</span>
+                </div>
+              </div>
+              <div className="status-item">
+                <div className="status-icon apple">
+                  <i className="mdi mdi-map-marker"></i>
+                </div>
+                <div className="status-content">
+                  <span className="status-title">تعداد پولیگان های سیب</span>
+                  <span className="status-value">n مورد</span>
+                  <span className="status-value">سطح زیر کشت: فلان</span>
+                </div>
+              </div>
+
+              <div className="status-item">
+                <div className="status-icon wallnut">
+                  <i className="mdi mdi-map-marker"></i>
+                </div>
+                <div className="status-content">
+                  <span className="status-title">تعداد پولیگان های گردو</span>
+                  <span className="status-value">n مورد</span>
+                  <span className="status-value">سطح زیر کشت: فلان</span>
+                </div>
+              </div>
+              <div className="status-item">
+                <div className="status-icon palm">
+                  <i className="mdi mdi-map-marker"></i>
+                </div>
+                <div className="status-content">
+                  <span className="status-title">تعداد پولیگان های نخل</span>
+                  <span className="status-value">n مورد</span>
+                  <span className="status-value">سطح زیر کشت: فلان</span>
+                </div>
+              </div>
+              <div className="status-item">
+                <div className="status-icon citrus">
+                  <i className="mdi mdi-map-marker"></i>
+                </div>
+                <div className="status-content">
+                  <span className="status-title">تعداد پولیگان های مرکبات</span>
+                  <span className="status-value">n مورد</span>
+                  <span className="status-value">سطح زیر کشت: فلان</span>
                 </div>
               </div>
             </div>

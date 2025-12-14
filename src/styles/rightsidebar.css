@@ -453,18 +453,26 @@
   justify-content: center;
   font-size: 1.2rem;
   background: rgba(255, 255, 255, 0.1);
-  color: #a2a3b7;
+  color: #ff4081;
   flex-shrink: 0;
 }
 
-.status-icon.online {
-  background: rgba(56, 142, 60, 0.2);
-  color: #4caf50;
+.status-icon.apple {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ff0000;
 }
 
-.status-icon.warning {
-  background: rgba(245, 124, 0, 0.2);
+.status-icon.wallnut {
+  background: rgba(255, 255, 255, 0.1);
   color: #ff9800;
+}
+.status-icon.palm {
+  background: rgba(255, 255, 255, 0.1);
+  color: #085e00;
+}
+.status-icon.citrus {
+  background: rgba(255, 255, 255, 0.1);
+  color: #c8ff00;
 }
 
 .status-content {
