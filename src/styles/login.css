@@ -1,0 +1,364 @@
+@import url("https://cdn.jsdelivr.net/npm/@mdi/font@5.8.55/css/materialdesignicons.min.css");
+/* Login Page Styles - Updated to match sidebar dark theme */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #1e1e2d; /* Changed to sidebar background color */
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-card {
+  background: #2a2a3c; /* Changed to sidebar secondary background */
+  border-radius: 10px; /* Reduced from 20px to match sidebar */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* Darker shadow */
+  width: 100%;
+  max-width: 420px;
+  overflow: hidden;
+  animation: slideUp 0.6s ease-out;
+  border: 1px solid #363648; /* Added border like sidebar */
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-header {
+  text-align: center;
+  padding: 40px 40px 20px;
+  background: linear-gradient(
+    135deg,
+    #8f5fe8 0%,
+    #0080ff 100%
+  ); /* Changed to sidebar accent colors */
+  color: white;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid #2d2d3d; /* Added border like sidebar */
+}
+
+.login-header::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.1) 1px,
+    transparent 1px
+  );
+  background-size: 20px 20px;
+  animation: moveBackground 20s linear infinite;
+  opacity: 0.3; /* Reduced opacity for dark theme */
+}
+
+@keyframes moveBackground {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.logo i {
+  font-size: 40px;
+  color: #fff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)); /* Darker shadow */
+}
+
+.logo h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Darker shadow */
+}
+
+.login-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 10px 0 5px;
+  color: #fff;
+}
+
+.login-header p {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+  color: #a2a3b7; /* Changed to sidebar text color */
+}
+
+.login-form {
+  padding: 30px 40px;
+}
+
+.error-message {
+  background: #2a2a3c; /* Changed to match card background */
+  border: 1px solid #363648; /* Changed to sidebar border color */
+  color: #ff6b6b; /* Changed to a red that works on dark background */
+  padding: 12px 15px;
+  border-radius: 4px; /* Reduced to match sidebar */
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.error-message i {
+  font-size: 18px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #a2a3b7; /* Changed to sidebar text color */
+  font-size: 14px;
+}
+
+.form-group label i {
+  color: #8f5fe8; /* Changed to sidebar accent color */
+  font-size: 18px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 14px 16px;
+  background: #1e1e2d; /* Changed to dark background */
+  border: 2px solid #363648; /* Changed to sidebar border color */
+  border-radius: 4px; /* Reduced to match sidebar */
+  font-size: 15px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  color: #fff; /* Changed to white text */
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #8f5fe8; /* Changed to sidebar accent color */
+  box-shadow: 0 0 0 3px rgba(143, 95, 232, 0.2); /* Updated color */
+}
+
+.form-group input::placeholder {
+  color: #6c7293; /* Changed to match sidebar placeholder color */
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #a2a3b7; /* Changed to sidebar text color */
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #8f5fe8; /* Changed to sidebar accent color */
+  cursor: pointer;
+}
+
+.forgot-password {
+  color: #8f5fe8; /* Changed to sidebar accent color */
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: #0080ff; /* Changed to sidebar blue accent */
+  text-decoration: underline;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(
+    135deg,
+    #8f5fe8 0%,
+    #0080ff 100%
+  ); /* Changed to sidebar accent colors */
+  color: white;
+  border: none;
+  border-radius: 4px; /* Reduced to match sidebar */
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.login-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 14px rgba(143, 95, 232, 0.3); /* Updated color */
+}
+
+.login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: #363648; /* Changed to disabled state */
+}
+
+.login-btn i {
+  font-size: 20px;
+}
+
+.guest-login {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #363648; /* Changed to sidebar border color */
+}
+
+.guest-login p {
+  color: #a2a3b7; /* Changed to sidebar text color */
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.guest-btn {
+  width: 100%;
+  padding: 14px;
+  background: #2a2a3c;
+  color: #58ac5d; /* Green text */
+  border: 2px solid #58ac5d; /* Green border */
+  border-radius: 4px; /* Reduced to match sidebar */
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.guest-btn:hover:not(:disabled) {
+  background: #58ac5d; /* Solid green background on hover */
+  color: #fff;
+  border-color: #58ac5d;
+  transform: translateY(-1px);
+}
+
+.guest-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-footer {
+  padding: 20px 40px;
+  text-align: center;
+  background: #1b1b28; /* Changed to dark footer background */
+  border-top: 1px solid #363648; /* Changed to sidebar border color */
+}
+
+.login-footer p {
+  color: #a2a3b7; /* Changed to sidebar text color */
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.register-link {
+  color: #8f5fe8; /* Changed to sidebar accent color */
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.register-link:hover {
+  color: #0080ff; /* Changed to sidebar blue accent */
+  text-decoration: underline;
+}
+
+.copyright {
+  color: #6c7293; /* Changed to match sidebar muted text */
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-card {
+    max-width: 100%;
+    margin: 10px;
+  }
+
+  .login-header {
+    padding: 30px 20px 15px;
+  }
+
+  .login-form {
+    padding: 20px;
+  }
+
+  .login-footer {
+    padding: 15px 20px;
+  }
+
+  .logo {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .logo h1 {
+    font-size: 20px;
+  }
+}
+
+/* Material Design Icons import (if not already included) */

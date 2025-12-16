@@ -8,18 +8,13 @@ import "../styles/map.css";
 // Global variable to track IDs consistently
 let nextId = 1000000;
 
-// Helper function to check if label is unique
+// Helper function to check if label is unique (CHANGED: Always returns true since labels don't need to be unique)
 const isLabelUnique = (label, polygonsRef, excludeId = null) => {
-  if (!label || !label.trim()) return true;
-  return !polygonsRef.current.some(
-    (polygon) =>
-      polygon.label &&
-      polygon.label.trim().toLowerCase() === label.trim().toLowerCase() &&
-      polygon.id !== excludeId
-  );
+  // CHANGED: Labels no longer need to be unique
+  return true;
 };
 
-// Helper function to check if code/ID is unique
+// Helper function to check if code/ID is unique (UNCHANGED: Codes still need to be unique)
 const isCodeUnique = (code, polygonsRef, excludeId = null) => {
   if (!code || !code.trim()) return true;
   return !polygonsRef.current.some(
@@ -210,7 +205,7 @@ function attachPolygonMenu(
         };
       }
 
-      // Edit Properties button
+      // Edit Properties button (CHANGED: Swapped order - label first, then code)
       const propertiesBtn = document.getElementById(
         `properties-btn-${polygonId}`
       );
@@ -226,36 +221,23 @@ function attachPolygonMenu(
             let valid = false;
 
             while (!valid) {
+              // CHANGED: Label comes first
+              newLabel = prompt("Enter new label:", currentLabel);
+              if (newLabel === null) return null;
+
+              // CHANGED: Code comes second
               newCode = prompt(
                 "Enter new code ID (must be unique):",
                 currentCode
               );
               if (newCode === null) return null;
 
-              newLabel = prompt(
-                "Enter new label (must be unique):",
-                currentLabel
-              );
-              if (newLabel === null) return null;
-
+              // CHANGED: Only check code uniqueness, not label uniqueness
               const isCodeValid = isCodeUnique(newCode, polygonsRef, polygonId);
-              const isLabelValid = isLabelUnique(
-                newLabel,
-                polygonsRef,
-                polygonId
-              );
 
-              if (!isCodeValid && !isLabelValid) {
-                alert(
-                  "❌ Error: Both Code ID and Label already exist. Please use unique values."
-                );
-              } else if (!isCodeValid) {
+              if (!isCodeValid) {
                 alert(
                   "❌ Error: Code ID already exists. Please use a unique Code ID."
-                );
-              } else if (!isLabelValid) {
-                alert(
-                  "❌ Error: Label already exists. Please use a unique Label."
                 );
               } else {
                 valid = true;
@@ -394,25 +376,18 @@ function DrawTools({ polygonsRef, updateSavedPolygons, onPolygonSelect }) {
         let valid = false;
 
         while (!valid) {
-          codeId = prompt("Enter code ID (must be unique):");
-          if (codeId === null) return null;
-
-          label = prompt("Enter label (must be unique):");
+          // CHANGED: Swapped order - label first, then code
+          label = prompt("Enter label (can be duplicate):");
           if (label === null) return null;
 
-          const isCodeValid = isCodeUnique(codeId, polygonsRef);
-          const isLabelValid = isLabelUnique(label, polygonsRef);
+          codeId = prompt("Enter the code (must be unique):");
+          if (codeId === null) return null;
 
-          if (!isCodeValid && !isLabelValid) {
-            alert(
-              "❌ Error: Both Code ID and Label already exist. Please use unique values."
-            );
-          } else if (!isCodeValid) {
-            alert(
-              "❌ Error: Code ID already exists. Please use a unique Code ID."
-            );
-          } else if (!isLabelValid) {
-            alert("❌ Error: Label already exists. Please use a unique Label.");
+          // CHANGED: Only check code uniqueness, not label uniqueness
+          const isCodeValid = isCodeUnique(codeId, polygonsRef);
+
+          if (!isCodeValid) {
+            alert("❌ Error: Code already exists. Please use a unique code.");
           } else {
             valid = true;
           }
@@ -867,8 +842,8 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
       console.log("🔄 Attempting to save polygons...");
       console.log("📊 Current polygons in memory:", polygonsRef.current.length);
 
+      // CHANGED: Only check for duplicate codes, not labels
       const codeMap = new Map();
-      const labelMap = new Map();
       const duplicates = [];
 
       for (const polygon of polygonsRef.current) {
@@ -884,29 +859,16 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
             codeMap.set(codeKey, polygon.id);
           }
         }
-
-        if (polygon.label) {
-          const labelKey = polygon.label.trim().toLowerCase();
-          if (labelMap.has(labelKey)) {
-            duplicates.push(
-              `Label: "${polygon.label}" (used by polygons: ${labelMap.get(
-                labelKey
-              )} and ${polygon.id})`
-            );
-          } else {
-            labelMap.set(labelKey, polygon.id);
-          }
-        }
       }
 
       if (duplicates.length > 0) {
         const errorMessage =
-          "Cannot save: Duplicate values found:\n\n" + duplicates.join("\n");
+          "Cannot save: Duplicate codes found:\n\n" + duplicates.join("\n");
         alert("❌ " + errorMessage);
         return;
       }
 
-      console.log("✅ All polygons have unique codes and labels");
+      console.log("✅ All polygons have unique codes");
 
       try {
         const testResponse = await fetch("http://localhost:3001/api/test");
@@ -1102,8 +1064,8 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
 
   /* ---------- DOWNLOAD polygons.json ---------- */
   const downloadPolygons = () => {
+    // CHANGED: Only check for duplicate codes, not labels
     const codeMap = new Map();
-    const labelMap = new Map();
     const duplicates = [];
 
     for (const polygon of polygonsRef.current) {
@@ -1115,20 +1077,11 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
           codeMap.set(codeKey, polygon.id);
         }
       }
-
-      if (polygon.label) {
-        const labelKey = polygon.label.trim().toLowerCase();
-        if (labelMap.has(labelKey)) {
-          duplicates.push(`Label: "${polygon.label}"`);
-        } else {
-          labelMap.set(labelKey, polygon.id);
-        }
-      }
     }
 
     if (duplicates.length > 0) {
       const errorMessage =
-        "Cannot download: Duplicate values found:\n\n" + duplicates.join("\n");
+        "Cannot download: Duplicate codes found:\n\n" + duplicates.join("\n");
       alert("❌ " + errorMessage);
       return;
     }
@@ -1239,12 +1192,6 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
           className={`map-btn rectangle-select-btn ${
             isRectangleSelectMode ? "active" : ""
           }`}
-          // style={{
-          //   backgroundColor: isRectangleSelectMode
-          //     ? "rgba(255, 45, 80, 1)ff"
-          //     : "#2d2d38",
-          //   color: "white",
-          // }}
         >
           {isRectangleSelectMode
             ? "✋ Cancel Selection"
@@ -1505,7 +1452,7 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
                         };
                       }
 
-                      // Edit Properties button
+                      // Edit Properties button (CHANGED: Swapped order - label first, then code)
                       const propertiesBtn = document.getElementById(
                         `properties-btn-${polygonId}`
                       );
@@ -1523,40 +1470,30 @@ export default function IranMap({ onPolygonsUpdate, selectedPolygon }) {
                             let valid = false;
 
                             while (!valid) {
+                              // CHANGED: Label comes first
+                              newLabel = prompt(
+                                "Enter new label:",
+                                currentLabel
+                              );
+                              if (newLabel === null) return null;
+
+                              // CHANGED: Code comes second
                               newCode = prompt(
                                 "Enter new code ID (must be unique):",
                                 currentCode
                               );
                               if (newCode === null) return null;
 
-                              newLabel = prompt(
-                                "Enter new label (must be unique):",
-                                currentLabel
-                              );
-                              if (newLabel === null) return null;
-
+                              // CHANGED: Only check code uniqueness, not label uniqueness
                               const isCodeValid = isCodeUnique(
                                 newCode,
                                 polygonsRef,
                                 polygonId
                               );
-                              const isLabelValid = isLabelUnique(
-                                newLabel,
-                                polygonsRef,
-                                polygonId
-                              );
 
-                              if (!isCodeValid && !isLabelValid) {
-                                alert(
-                                  "❌ Error: Both Code ID and Label already exist. Please use unique values."
-                                );
-                              } else if (!isCodeValid) {
+                              if (!isCodeValid) {
                                 alert(
                                   "❌ Error: Code ID already exists. Please use a unique Code ID."
-                                );
-                              } else if (!isLabelValid) {
-                                alert(
-                                  "❌ Error: Label already exists. Please use a unique Label."
                                 );
                               } else {
                                 valid = true;

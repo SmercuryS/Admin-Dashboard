@@ -96,7 +96,7 @@ export default function RightSidebar() {
               <i className="mdi mdi-information"></i>
             </span>
             {!isSidebarMinimized && (
-              <span className="menu-title">وضعیت سیستم</span>
+              <span className="menu-title">نمای کلی سیستم</span>
             )}
           </div>
 

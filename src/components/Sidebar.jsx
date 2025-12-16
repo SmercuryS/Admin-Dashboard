@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import "../styles/sidebar.css";
 
 export default function Sidebar({ polygons, onPolygonSelect }) {
@@ -10,13 +10,32 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
 
   const options = ["___", "سیب", "گردو", "نخل", "مرکبات"];
-  const provinceOptions = [
+
+  // Base province options
+  const baseProvinceOptions = [
     "___",
     "فارس",
     "کهکیلویه و بویراحمد",
     "یزد",
     "کرمان",
   ];
+
+  // Get all unique code IDs from polygons
+  const polygonCodes = useMemo(() => {
+    if (!polygons || !polygons.features) return [];
+
+    const codes = polygons.features
+      .map((feature) => feature.properties?.code)
+      .filter((code) => code && code.trim() !== "") // Filter out empty/null codes
+      .filter((code, index, self) => self.indexOf(code) === index); // Get unique values
+
+    return codes;
+  }, [polygons]);
+
+  // Combine base province options with polygon code IDs
+  const provinceOptions = useMemo(() => {
+    return [...baseProvinceOptions, ...polygonCodes];
+  }, [baseProvinceOptions, polygonCodes]);
 
   // Toggle sidebar minimized state
   const toggleSidebar = () => {
@@ -47,11 +66,15 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
     const query = searchQuery.toLowerCase();
     const results = polygons.features.filter((feature) => {
       const label = feature.properties?.label || "";
-      return label.toLowerCase().includes(query);
+      const code = feature.properties?.code || "";
+      return (
+        label.toLowerCase().includes(query) ||
+        code.toLowerCase().includes(query)
+      );
     });
 
     setSearchResults(results);
-    setSelectedResult(null); // Clear previous selection when new search
+    setSelectedResult(null);
     console.log(`Found ${results.length} polygons matching "${searchQuery}"`);
   };
 
@@ -59,7 +82,6 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
   const handleResultClick = (polygon) => {
     setSelectedResult(polygon);
 
-    // Notify parent component (App.jsx) about the selection
     if (onPolygonSelect) {
       onPolygonSelect(polygon);
     }
@@ -71,7 +93,6 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
   const handleAllPolygonClick = (polygon) => {
     setSelectedResult(polygon);
 
-    // Notify parent component (App.jsx) about the selection
     if (onPolygonSelect) {
       onPolygonSelect(polygon);
     }
@@ -85,7 +106,6 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
     setSearchResults([]);
     setSelectedResult(null);
 
-    // Clear selection in parent component
     if (onPolygonSelect) {
       onPolygonSelect(null);
     }
@@ -133,7 +153,6 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
             {!isSidebarMinimized && <span className="menu-title">جستجو</span>}
           </div>
           <div className="search-section">
-            {/* Search input - hidden when minimized */}
             {!isSidebarMinimized && (
               <>
                 <div className="search-input-group">
@@ -143,7 +162,7 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="جستجوی برچسب پولیگان ..."
+                      placeholder="جستجوی کد یا برچسب پولیگان ..."
                       className="search-input"
                       dir="auto"
                       onKeyPress={(e) => e.key === "Enter" && handleSearch()}
@@ -190,10 +209,10 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
                           </div>
                           <div className="result-content">
                             <span className="menu-title">
-                              {polygon.properties?.label || "بدون نام"}
+                              {polygon.properties?.code || "N/A"}
                             </span>
                             <span className="result-code">
-                              {polygon.properties?.code || "N/A"}
+                              {polygon.properties?.label || "بدون نام"}
                             </span>
                           </div>
                         </div>
@@ -203,8 +222,6 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
                 )}
               </>
             )}
-
-            {/* Search icon only when minimized */}
 
             {!isSidebarMinimized &&
               polygons &&
@@ -238,50 +255,54 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
             )}
           </div>
 
-          {!isSidebarMinimized &&
-            showAllPolygons &&
-            polygons &&
-            polygons.features.length > 0 && (
-              <ul className="nav flex-column sub-menu">
-                <div className="results-header">
-                  <span>کل پولیگان‌ها: {polygons.features.length}</span>
-                </div>
-                {polygons.features.map((polygon) => (
-                  <li
-                    key={polygon.id || polygon.properties?.id}
-                    className="nav-item"
-                  >
-                    <div
-                      className={`nav-link ${
-                        selectedResult?.id === polygon.id ? "active" : ""
-                      }`}
-                      onClick={() => handleAllPolygonClick(polygon)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <span className="menu-icon">
-                        <i className="mdi mdi-map-marker"></i>
-                      </span>
-                      <span className="menu-title">
-                        {polygon.properties?.label || "بدون نام"}
-                      </span>
-                      <span className="result-code">
-                        ({polygon.properties?.code || "N/A"})
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-          {!isSidebarMinimized &&
-            showAllPolygons &&
-            polygons &&
-            polygons.features.length === 0 && (
-              <div className="no-data-message">
-                <i className="mdi mdi-map-outline"></i>
-                هنوز پولیگانی وجود ندارد.
+          {!isSidebarMinimized && showAllPolygons && (
+            <div className="all-polygons-container">
+              <div className="polygons-list-header">
+                <span className="polygons-count">
+                  کل پولیگان‌ها: {polygons?.features?.length || 0}
+                </span>
+                <button
+                  onClick={() => setShowAllPolygons(false)}
+                  className="small-clear-btn"
+                >
+                  <i className="mdi mdi-close"></i>
+                </button>
               </div>
-            )}
+
+              {polygons && polygons.features && polygons.features.length > 0 ? (
+                <div className="polygons-scroll-container">
+                  <div className="polygons-list">
+                    {polygons.features.map((polygon) => (
+                      <div
+                        key={polygon.id || polygon.properties?.id}
+                        className={`polygon-item ${
+                          selectedResult?.id === polygon.id ? "active" : ""
+                        }`}
+                        onClick={() => handleAllPolygonClick(polygon)}
+                      >
+                        <div className="polygon-icon">
+                          <i className="mdi mdi-map-marker"></i>
+                        </div>
+                        <div className="polygon-info">
+                          <span className="polygon-label">
+                            {polygon.properties?.code || "N/A"}
+                          </span>
+                          <span className="polygon-code">
+                            {polygon.properties?.label || "بدون نام"}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="no-data-message">
+                  <i className="mdi mdi-map-outline"></i>
+                  هنوز پولیگانی وجود ندارد.
+                </div>
+              )}
+            </div>
+          )}
         </li>
 
         {/* TAGS SECTION */}
@@ -343,16 +364,10 @@ export default function Sidebar({ polygons, onPolygonSelect }) {
 
           {!isSidebarMinimized && (
             <div className="provinces-section">
-              {/* STATIC FIRST DROPPER */}
-              {/* <select className="form-control droppers">
-                {provinceOptions.map((p) => (
-                  <option key={p}>{p}</option>
-                ))}
-              </select> */}
-
               {provinceSelects.map((item) => (
                 <div key={item.id} className="dynamic-row">
                   <select className="form-control droppers">
+                    {/* Now includes both provinces and polygon codes */}
                     {provinceOptions.map((p) => (
                       <option key={p}>{p}</option>
                     ))}
