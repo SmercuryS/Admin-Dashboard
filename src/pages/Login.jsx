@@ -9,6 +9,7 @@ function Login({ onLogin }) {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [test];
 
   // Hardcoded credentials
   const HARDCODED_USERNAME = "admin";
